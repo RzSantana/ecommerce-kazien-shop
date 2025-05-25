@@ -1,0 +1,13 @@
+{
+  "name": "backend-ecommerce",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "hono": "^4.7.10"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
