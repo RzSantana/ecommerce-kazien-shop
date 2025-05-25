@@ -1,0 +1,15 @@
+---
+import LoginForm from "@components/authForm/LoginForm";
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import Button from "@components/utils/Button";
+---
+
+<AuthLayout
+    title="Personal Access"
+    subtitle="Control and tracking of your purchases"
+>
+    <LoginForm slot="form" client:load />
+    <span slot="footer">
+        Dont't have an account? <Button text="Sing up"  type="link" href="/auth/register"/>
+    </span>
+</AuthLayout>

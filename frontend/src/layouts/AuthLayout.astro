@@ -1,0 +1,52 @@
+---
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import MainLayout from "@layouts/MainLayout.astro";
+import Button from "@components/utils/Button";
+
+const { title, subtitle } = Astro.props;
+---
+
+<MainLayout title="Login">
+    <main
+        class="w-full h-full bg-stone-900 px-8 pt-8 pb-24 flex flex-col text-white"
+    >
+        <div class="flex justify-start">
+            <Button
+                text="Go Back"
+                type="link"
+                href="/"
+                icon='←'
+            />
+        </div>
+        <section
+            class="w-full h-full
+            flex flex-col gap-8
+            justify-center items-center"
+        >
+            <!-- Logo -->
+            <img class="w-12" src="/logo-color-primary.svg" alt="" />
+
+            <!-- Title Container -->
+            <div class="flex flex-col text-center gap-1">
+                <h1 class="uppercase font-black text-5xl">
+                    {title ?? "Default Title"}
+                </h1>
+                <h2>
+                    {subtitle ?? "Default Subtitle"}
+                </h2>
+            </div>
+            <div>
+                <slot name="form" />
+            </div>
+        </section>
+        <div
+            class="text-center text-xs
+            [&>*]:w-full [&>*]:h-fit [&>*]:[&>*]:px-0
+            [&>*]:flex [&>*]:flex-row [&>*]:gap-x-1
+            [&>*]:justify-center [&>*]:items-center"
+        >
+            <slot name="footer" />
+        </div>
+    </main>
+</MainLayout>
