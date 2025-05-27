@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@theme {
+    --color-primary: #ff3131;
+
+    --animate-inifinit-sroll: infinit-sroll 20s linear infinite;
+}
+
+@keyframes infinit-sroll {
+    to {
+        transform: translateX(calc(-100%));
+    }
+}

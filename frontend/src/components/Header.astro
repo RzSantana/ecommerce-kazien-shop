@@ -1,0 +1,41 @@
+---
+import Button from "./utils/Button";
+import { ActionsHeaderClient } from "@components/ActionsHeaderClient";
+---
+
+<header class="box-border
+    fixed top-0 left-0 z-50
+    w-full
+    px-8 py-8">
+    <div
+        class="px-12 py-1.5
+        grid grid-cols-[1fr_auto_1fr] [&>*]:items-center
+        text-white bg-stone-900/50 backdrop-blur-lg rounded-xl"
+    >
+        <!-- Logo -->
+        <div class="flex flex-row gap-4 py-1 select-none">
+            <img
+                class="h-full w-8"
+                src="/logo-color-primary.svg"
+                alt="Logo de la marca Kaizen Shop"
+            />
+            <span class="uppercase text-3xl font-black">Kaizen</span>
+        </div>
+
+        <!-- Navegación -->
+        <nav
+            class="flex flex-row justify-center gap-12
+        [&>*]:font-light [&>*]:text-md"
+        >
+            <Button text="HOME" type="link" href="/" />
+            <Button text="SHOP" type="link" href="/" />
+            <Button text="DROPS" type="link" href="/" />
+            <Button text="CONTACT" type="link" href="/" />
+        </nav>
+
+        <!-- Acciones -->
+        <div class="flex flex-row justify-end gap-4">
+            <ActionsHeaderClient client:load />
+        </div>
+    </div>
+</header>

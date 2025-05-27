@@ -4,6 +4,7 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, type FormEvent } from "react";
+import { signIn } from "auth-astro/client";
 
 export default function LoginForm() {
     const [isShowPassword, setIsShowPassword] = useState(false);
@@ -14,6 +15,12 @@ export default function LoginForm() {
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
+    };
+
+    const handleGoogleLogin = () => {
+        console.log('hello world');
+
+        signIn("google");
     };
 
     return (
@@ -38,6 +45,7 @@ export default function LoginForm() {
                     text="Sing in with Google"
                     type="secundary"
                     icon={<FontAwesomeIcon icon={faGoogle} size="lg" />}
+                    onClick={handleGoogleLogin}
                 />
             </div>
         </form>
