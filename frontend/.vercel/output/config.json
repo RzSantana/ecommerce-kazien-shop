@@ -22,18 +22,6 @@
 		{
 			"src": "^/api/auth(?:/(.*?))?/?$",
 			"dest": "_render"
-		},
-		{
-			"src": "^/auth/login/?$",
-			"dest": "_render"
-		},
-		{
-			"src": "^/auth/register/?$",
-			"dest": "_render"
-		},
-		{
-			"src": "^/$",
-			"dest": "_render"
 		}
 	]
 }

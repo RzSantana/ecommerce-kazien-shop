@@ -10,6 +10,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   integrations: [react(), auth()],
   output: "server",
+
   adapter: vercel(),
 
   vite: {
