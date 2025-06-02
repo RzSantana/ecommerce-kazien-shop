@@ -1,0 +1,145 @@
+---
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Button from "./utils/Button";
+import Title from "./utils/Title.astro";
+import { faInstagram } from "@fortawesome/free-brands-svg-icons";
+import { faEarth } from "@fortawesome/free-solid-svg-icons";
+
+interface Collection {
+    text: string;
+    href: string;
+}
+
+const drops: Collection[] = [
+    {
+        text: "Drop 1°",
+        href: "/drops/drop-1",
+    },
+    {
+        text: "Drop 2°",
+        href: "/drops/drop-2",
+    },
+];
+
+export const prerender = false;
+---
+
+<footer class="bg-black text-white flex flex-col gap-8 px-8 pt-12 pb-8">
+    <div class="grid grid-cols-[.25fr_1fr] gap-40">
+        <Title isPrimary={false} style="text-white">KAIZEN SHOP</Title>
+
+        <div class="flex flex-row w-full gap-4">
+            <div class="flex flex-col gap-1.5 items-start w-60">
+                <span class="px-3 py-2 font-extrabold text-2xl">Products</span>
+                <div
+                    class="flex flex-col gap-1.5 items-start w-fit [&>*]:font-medium"
+                >
+                    <Button text="News" type="link" href="/product/news" />
+                    <Button
+                        text="Most popular"
+                        type="link"
+                        href="/product/most-popular"
+                    />
+                    <Button
+                        text="T-Shirts"
+                        type="link"
+                        href="/product/t-shirts"
+                    />
+                    <Button text="Pants" type="link" href="/product/pants" />
+                    <Button
+                        text="Accesories"
+                        type="link"
+                        href="/product/accesories"
+                    />
+                </div>
+            </div>
+            <div class="flex flex-col gap-1.5 items-start w-60">
+                <span class="px-3 py-2 font-extrabold text-2xl">Colletions</span
+                >
+                <div
+                    class="flex flex-col gap-1.5 items-start w-fit [&>*]:font-medium"
+                >
+                    {
+                        drops.length === 0 ? (
+                            <Button
+                                text="All drops"
+                                href="/drops"
+                                type="link"
+                            />
+                        ) : (
+                            drops.map((drop) => (
+                                <Button
+                                    text={drop.text}
+                                    href={drop.href}
+                                    type="link"
+                                />
+                            ))
+                        )
+                    }
+                </div>
+            </div>
+            <div class="flex flex-col gap-1.5 items-start w-60">
+                <span class="px-3 py-2 font-extrabold text-2xl">Support</span>
+                <div
+                    class="flex flex-col gap-1.5 items-start w-fit [&>*]:font-medium"
+                >
+                    <Button text="Help" type="link" href="/support/help" />
+                    <Button
+                        text="Order status"
+                        type="link"
+                        href="/support/order-status"
+                    />
+                    <Button
+                        text="Shipping and delivery"
+                        type="link"
+                        href="/support/shipping-and-delivery"
+                    />
+
+                    <Button
+                        text="Returns and refunds"
+                        type="link"
+                        href="/support/returns-and-refunds"
+                    />
+                    <Button
+                        text="Size chart"
+                        type="link"
+                        href="/support/size-chart"
+                    />
+                    <Button
+                        text="Payment methods"
+                        type="link"
+                        href="/support/payment-methods"
+                    />
+                    <Button
+                        text="Contact us"
+                        type="link"
+                        href="/support/contact-us"
+                    />
+                </div>
+            </div>
+            <div class="flex flex-col gap-1.5 items-start w-60">
+                <span class="px-3 py-2 font-extrabold text-2xl">Brand</span>
+                <div
+                    class="flex flex-col gap-1.5 items-start w-fit [&>*]:font-medium"
+                >
+                    <Button text="About us" type="link" href="/about-us" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-row justify-between items-center">
+        <span class="text-stone-400 text-xs"
+            >@2025 Kaizen Shop. All rights reserved</span
+        >
+        <div class="flex flex-row items-center gap-8">
+            <div class="flex flex-row items-center gap-">
+                <Button text="Español" href="/es" type="link" />
+                <span class="[&>*]:underline [&>*]:underline-offset-4">
+                    <Button text="English" href="/es" type="link" />
+                </span>
+                <FontAwesomeIcon icon={faEarth} />
+            </div>
+            <FontAwesomeIcon icon={faInstagram} className="text-white" />
+        </div>
+    </div>
+</footer>

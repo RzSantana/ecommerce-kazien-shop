@@ -1,0 +1,14 @@
+---
+export interface Props {
+    isPrimary: boolean;
+    style?: string;
+}
+
+const { isPrimary, style } = Astro.props;
+---
+
+<h1
+    class=`${isPrimary ? 'text-(--color-primary)' : (style ?? 'text-black')} uppercase font-black text-5xl `
+>
+    <slot />
+</h1>

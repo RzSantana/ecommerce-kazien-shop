@@ -1,13 +1,158 @@
 @import "tailwindcss";
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
 
-@theme {
+:root {
     --color-primary: #ff3131;
-
     --animate-inifinit-sroll: infinit-sroll 20s linear infinite;
+
+    /* Swiper custom styles */
+    --swiper-navigation-color: var(--color-primary);
+    --swiper-pagination-color: var(--color-primary);
 }
 
 @keyframes infinit-sroll {
     to {
         transform: translateX(calc(-100%));
     }
+}
+
+/* Estilos modernos para el slider - Agregar a tu CSS global */
+
+.product-slider-enhanced {
+  padding-bottom: 50px;
+  overflow: visible;
+}
+
+/* Botones de navegación redesñados - estilo minimalista */
+.product-slider-enhanced .swiper-button-next,
+.product-slider-enhanced .swiper-button-prev {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.95);
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.product-slider-enhanced .swiper-button-next:hover,
+.product-slider-enhanced .swiper-button-prev:hover {
+  background: #374151;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.product-slider-enhanced .swiper-button-next:after,
+.product-slider-enhanced .swiper-button-prev:after {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Alternativamente, si prefieres botones más modernos tipo "outline" */
+.product-slider-enhanced .swiper-button-next.alt,
+.product-slider-enhanced .swiper-button-prev.alt {
+  color: #000;
+  background: transparent;
+  border: 2px solid #e5e7eb;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.product-slider-enhanced .swiper-button-next.alt:hover,
+.product-slider-enhanced .swiper-button-prev.alt:hover {
+  border-color: #000;
+  background: #000;
+  color: white;
+}
+
+/* Paginación - puntos más pequeños y elegantes */
+.product-slider-enhanced .swiper-pagination {
+  position: relative;
+  margin-top: 32px;
+}
+
+.custom-bullet {
+  background: #d1d5db;
+  opacity: 1;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.custom-bullet-active {
+  background: #374151;
+  width: 24px;
+  border-radius: 12px;
+  transform: none;
+}
+
+/* Alternativa - puntos aún más pequeños */
+.custom-bullet.mini {
+  width: 6px;
+  height: 6px;
+  margin: 0 3px;
+}
+
+.custom-bullet.mini.custom-bullet-active {
+  width: 18px;
+  border-radius: 9px;
+}
+
+/* Utility classes para el ProductCard */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animación suave para las slides */
+.product-slider-enhanced .swiper-slide {
+  transition: transform 0.3s ease;
+}
+
+.product-slider-enhanced .swiper-slide:hover {
+  transform: translateY(-3px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-slider-enhanced .swiper-button-next,
+  .product-slider-enhanced .swiper-button-prev {
+    width: 36px;
+    height: 36px;
+  }
+
+  .product-slider-enhanced .swiper-button-next:after,
+  .product-slider-enhanced .swiper-button-prev:after {
+    font-size: 14px;
+  }
+
+  .custom-bullet {
+    width: 6px;
+    height: 6px;
+    margin: 0 3px;
+  }
+
+  .custom-bullet-active {
+    width: 16px;
+    border-radius: 8px;
+  }
+}
+
+/* Ocultar botones en móviles si prefieres */
+@media (max-width: 640px) {
+  .product-slider-enhanced .swiper-button-next,
+  .product-slider-enhanced .swiper-button-prev {
+    display: none;
+  }
 }

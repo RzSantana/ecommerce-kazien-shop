@@ -1,8 +1,100 @@
 ---
+import Slider from '@components/utils/Slider'
 import Button from "@components/utils/Button";
+import Title from "@components/utils/Title.astro";
+import ProductCard from "@components/productCard/ProductCard";
 import ClientLayout from "@layouts/ClientLayout.astro";
+import type { IProduct } from '../types/product'
 
-export const prerender = true
+export const prerender = false;
+
+const currencyType = "€";
+
+const productsNewCollection: IProduct[] = [
+    {
+        cover: "",
+        currencyType: currencyType,
+        name: "Product 01",
+        price: 0,
+    },
+    {
+        cover: "",
+        currencyType: currencyType,
+        name: "Product 02",
+        price: 0,
+    },
+    {
+        cover: "",
+        currencyType: currencyType,
+        name: "Product 03",
+        price: 0,
+    },
+    {
+        cover: "",
+        currencyType: currencyType,
+        name: "Product 04",
+        price: 0,
+    },
+    {
+        cover: "",
+        currencyType: currencyType,
+        name: "Product 05",
+        price: 0,
+    },
+];
+
+// Productos para el slider TOP SALES
+const topSalesProducts: IProduct[] = [
+    {
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Professional Boxing Gloves",
+        price: 89.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Muay Thai Shorts",
+        price: 45.50,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Heavy Training Bag",
+        price: 199.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Hand Wraps Set",
+        price: 12.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Shin Guards Pro",
+        price: 67.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Focus Mitts",
+        price: 34.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "Training Gloves",
+        price: 55.99,
+    },
+    {
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        currencyType: currencyType,
+        name: "MMA Shorts",
+        price: 42.50,
+    },
+];
+
 ---
 
 <ClientLayout>
@@ -22,11 +114,7 @@ export const prerender = true
         flex flex-col justify-center items-center gap-6"
         >
             <div class="flex flex-col text-center items-center">
-                <h1
-                    class="uppercase font-black text-5xl text-(--color-primary)"
-                >
-                    KAIZEN PHILOSOPHY
-                </h1>
+                <Title isPrimary={true}> KAIZEN PHILOSOPHY </Title>
                 <h2
                     class="uppercase font-semibold text-xl text-white max-w-md text-center"
                 >
@@ -38,8 +126,8 @@ export const prerender = true
     </section>
 
     <!-- Flag -->
-    <div
-                class ="w-screen flex flex-row py-1.5
+    <section
+        class="w-screen flex flex-row py-1.5
         [&>*]:flex [&>*]:flex-row [&>*]:justify-between [&>*]:gap-2.5 [&>*]:min-w-full
         font-extrabold text-2xl [&>*]:text-nowrap [&>*]:select-none
         bg-(--color-primary) overflow-hidden
@@ -68,8 +156,80 @@ export const prerender = true
             <span>CONTINUOUS IMPROVEMENT</span>
             <span></span>
         </div>
-    </div>
+    </section>
 
     <!-- New Collection -->
+    <section
+        class="flex flex-col gap-12 px-24 py-24 text-center"
+    >
+        <Title isPrimary={false}>NEW COLLECTION</Title>
 
+        <div
+            class="flex flex-wrap gap-12 2xl:px-80 minh-96 justify-center items-center"
+        >
+            {
+                productsNewCollection.length === 0 ? (
+                    <span class="animate-pulse color-(--)">
+                        You must add a new collection to display your main
+                        products.
+                    </span>
+                ) : (
+                    productsNewCollection.map((product: IProduct) => (
+                        <ProductCard
+                            server:defer
+                            cover={product.cover}
+                            currencyType={product.currencyType}
+                            name={product.name}
+                            price={product.price}
+                        />
+                    ))
+                )
+            }
+        </div>
+    </section>
+
+    <!-- Highlighted  -->
+    <section
+        class="w-full h-fit min-h-[600px] bg-stone-950 px-12 py-40 grid grid-cols-2 gap-6
+        max-md:grid-cols-1 max-md:grid-rows-[auto_auto]
+        max-sm:grid-cols-1 max-sm:grid-rows-[auto_auto]"
+    >
+        <div
+            class="flex flex-col text-center justify-center items-center text-white gap-8"
+        >
+            <div class="flex flex-col gap-2">
+                <Title isPrimary={false} style="text-white">
+                    OVERCOMING YOUR LIMITS
+                </Title>
+                <p class="text-pretty max-w-2xl text-center">
+                    Professional equipment designed for those who seek
+                    excellence. Our exclusive line combines technological
+                    innovation with premium materials, creating products that
+                    withstand the most intense sessions. Trust the equipment
+                    chosen by champions to transform your potential into visible
+                    results.
+                </p>
+            </div>
+            <div class="flex place-content-center">
+                <Button text="SEE EQUIPMENT" type="outline" />
+            </div>
+        </div>
+        <picture class="bg-stone-400/20 w-full h-full min-w-full min-h-90">
+            <img
+                class="object-cover w-full h-full zoom"
+                src="/photo-highlighted.webp"
+                alt=""
+            />
+        </picture>
+    </section>
+
+    <!-- TOP SALES -->
+    <section class="min-h-30 bg-gray-50">
+        <Slider
+            products={topSalesProducts}
+            title="TOP SALES"
+            autoplay={true}
+            client:load
+        />
+    </section>
 </ClientLayout>
