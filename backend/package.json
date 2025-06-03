@@ -1,13 +1,21 @@
 {
-  "name": "backend-ecommerce",
-  "scripts": {
-    "dev": "bun run --hot src/index.ts"
-  },
-  "dependencies": {
-    "chalk": "^5.4.1",
-    "hono": "^4.7.10"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
+    "name": "backend-ecommerce",
+    "scripts": {
+        "dev": "bun run --hot src/index.ts",
+        "db:generate": "bunx prisma generate",
+        "db:push": "bunx prisma db push",
+        "db:migrate": "bunx prisma migrate dev",
+        "db:reset": "bunx prisma migrate reset",
+        "db:seed": "bun run src/database/seed.ts",
+        "db:studio": "bunx prisma studio"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.8.2",
+        "chalk": "^5.4.1",
+        "hono": "^4.7.10",
+        "prisma": "^6.8.2"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    }
 }
