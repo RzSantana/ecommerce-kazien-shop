@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Button from "./utils/Button";
+import Button from "./ui/Button";
 import { faSearch, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 export function ActionsHeaderClient() {

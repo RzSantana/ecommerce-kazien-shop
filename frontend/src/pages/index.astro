@@ -1,14 +1,14 @@
 ---
-import Slider from '@components/utils/Slider'
-import Button from "@components/utils/Button";
-import Title from "@components/utils/Title.astro";
+import Slider from "@components/ui/Slider";
+import Button from "@components/ui/Button";
+import Title from "@components/ui/Title.astro";
 import ProductCard from "@components/productCard/ProductCard";
 import ClientLayout from "@layouts/ClientLayout.astro";
-import type { IProduct } from '../types/product'
+import type { IProduct } from "../types/product";
 
 export const prerender = false;
 
-const currencyType = "€";
+export const currencyType = "€";
 
 const productsNewCollection: IProduct[] = [
     {
@@ -55,7 +55,7 @@ const topSalesProducts: IProduct[] = [
         cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
         currencyType: currencyType,
         name: "Muay Thai Shorts",
-        price: 45.50,
+        price: 45.5,
     },
     {
         cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
@@ -91,10 +91,9 @@ const topSalesProducts: IProduct[] = [
         cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
         currencyType: currencyType,
         name: "MMA Shorts",
-        price: 42.50,
+        price: 42.5,
     },
 ];
-
 ---
 
 <ClientLayout>
@@ -159,9 +158,7 @@ const topSalesProducts: IProduct[] = [
     </section>
 
     <!-- New Collection -->
-    <section
-        class="flex flex-col gap-12 px-24 py-24 text-center"
-    >
+    <section class="flex flex-col gap-12 px-24 py-24 text-center">
         <Title isPrimary={false}>NEW COLLECTION</Title>
 
         <div
@@ -224,7 +221,12 @@ const topSalesProducts: IProduct[] = [
     </section>
 
     <!-- TOP SALES -->
-    <section class="min-h-30 bg-gray-50">
+    <section class="min-h-30 bg-gray-50 px-24 py-24">
+        <div class="text-center">
+            <Title isPrimary={false}>
+                TOP SALES
+            </Title>
+        </div>
         <Slider
             products={topSalesProducts}
             title="TOP SALES"

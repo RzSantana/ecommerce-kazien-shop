@@ -20,14 +20,8 @@ export default function Slider({
     autoplay = true,
 }: SliderProps) {
     return (
-        <section className="py-16 bg-white">
+        <section className="py-16">
             <div className="max-w-7xl mx-auto px-6">
-                {title && (
-                    <h2 className="text-4xl font-bold text-center mb-12 uppercase tracking-wider text-gray-900">
-                        {title}
-                    </h2>
-                )}
-
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={24}

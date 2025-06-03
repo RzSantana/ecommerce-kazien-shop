@@ -1,0 +1,136 @@
+---
+import Title from "@components/ui/Title.astro";
+import ClientLayout from "@layouts/ClientLayout.astro";
+import ProductsFilter from "@components/ProductsFilter";
+
+export const prerender = false;
+
+const currencyType = "€";
+
+const products = [
+    {
+        id: "1",
+        name: "Black Dragon Rashguard",
+        price: 39.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "2",
+        name: "Pro Fight Shorts",
+        price: 34.99,
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        category: "Shorts",
+    },
+    {
+        id: "3",
+        name: "Samurai Spirit Long Sleeve",
+        price: 44.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "4",
+        name: "Competition Shorts",
+        price: 37.99,
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        category: "Shorts",
+    },
+    {
+        id: "5",
+        name: "Phoenix Compression Shirt",
+        price: 49.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "6",
+        name: "Tiger Muay Thai Shorts",
+        price: 32.99,
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        category: "Shorts",
+    },
+    {
+        id: "7",
+        name: "Dragon Scale Rash Guard",
+        price: 54.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "8",
+        name: "MMA Training Shorts",
+        price: 29.99,
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        category: "Shorts",
+    },
+    {
+        id: "9",
+        name: "Warrior Spirit Tank Top",
+        price: 24.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "10",
+        name: "Boxing Hand Wraps",
+        price: 9.99,
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        category: "Accessories",
+    },
+    {
+        id: "11",
+        name: "Pro Mouth Guard",
+        price: 19.99,
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        category: "Accessories",
+    },
+    {
+        id: "12",
+        name: "Compression Knee Pads",
+        price: 24.99,
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        category: "Accessories",
+    },
+    {
+        id: "13",
+        name: "BJJ Belt",
+        price: 29.99,
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        category: "Accessories",
+    },
+    {
+        id: "14",
+        name: "Wolf Pack Combat Shirt",
+        price: 42.99,
+        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+        category: "T-Shirts",
+    },
+    {
+        id: "15",
+        name: "Striking Training Shorts",
+        price: 36.99,
+        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
+        category: "Shorts",
+    },
+    {
+        id: "16",
+        name: "Ankle Support Guards",
+        price: 16.99,
+        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
+        category: "Accessories",
+    },
+];
+---
+
+<ClientLayout>
+    <section class="flex flex-col items-center pt-50 px-8 min-h-screen">
+        <Title isPrimary={false}>OUR PRODUCTS</Title>
+
+        <ProductsFilter
+            products={products}
+            currencyType={currencyType}
+            client:load
+        />
+    </section>
+</ClientLayout>

@@ -1,5 +1,5 @@
-import Button from "@components/utils/Button";
-import Input from "@components/utils/Input";
+import Button from "@components/ui/Button";
+import Input from "@components/ui/Input";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
