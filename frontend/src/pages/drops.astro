@@ -3,14 +3,29 @@ import Title from "@components/ui/Title.astro";
 import Button from "@components/ui/Button";
 import ClientLayout from "@layouts/ClientLayout.astro";
 import DropSection from "@components/DropSection";
-import { getFeaturedDrops } from "../utils/dropUtils";
+import { dropService } from "../services/dropService";
 
 export const prerender = false;
 
 const currencyType = "€";
 
-// Obtener drops desde las funciones utilitarias (simulando BD)
-const dropsData = await getFeaturedDrops();
+let dropsData: any[] = [];
+let errorMessage = "";
+
+try {
+    const apiDrops = await dropService.getAllDrops();
+
+    // Transformar drops para el frontend
+    dropsData = dropService.transformDropsToFrontend(apiDrops);
+
+    console.log(`Drops cargados: ${dropsData.length}`);
+} catch (error) {
+    console.error("Error al cargar drops:", error);
+    errorMessage = "Error al cargar las colecciones.";
+
+    // Fallback: mostrar mensaje sin drops
+    dropsData = [];
+}
 ---
 
 <ClientLayout>
@@ -22,14 +37,31 @@ const dropsData = await getFeaturedDrops();
     </p>
   </section>
 
-  <!-- Dynamic Drops Sections -->
-  {dropsData.map((drop) => (
-    <DropSection
-      drop={drop}
-      currencyType={currencyType}
-      client:load
-    />
-  ))}
+  {errorMessage ? (
+    <section class="text-center py-16">
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-md mx-auto">
+        {errorMessage}
+      </div>
+      <p class="text-gray-500">
+        Por favor, intenta nuevamente más tarde o verifica que el servidor esté funcionando.
+      </p>
+    </section>
+  ) : dropsData.length === 0 ? (
+    <section class="text-center py-16">
+      <p class="text-gray-500 text-lg">
+        No hay colecciones disponibles en este momento.
+      </p>
+    </section>
+  ) : (
+    // Dynamic Drops Sections
+    dropsData.map((drop) => (
+      <DropSection
+        drop={drop}
+        currencyType={currencyType}
+        client:load
+      />
+    ))
+  )}
 
   <!-- Newsletter Section -->
   <section class="py-16 bg-gray-100">

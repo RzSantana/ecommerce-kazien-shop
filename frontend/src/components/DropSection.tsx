@@ -1,10 +1,10 @@
 import Button from "@components/ui/Button";
 import ProductCard from "@components/productCard/ProductCard";
-import type { IDrop } from "../types/drop";
+import type { Drop } from "../types/drop";
 import { ProductWithBadges } from "./productCard/ProductWithBadges";
 
 interface DropSectionProps {
-    drop: IDrop;
+    drop: Drop;
     currencyType: string;
 }
 

@@ -1,25 +1,41 @@
-export interface IDrop {
+import type { Product } from "./product";
+
+export interface Drop {
   id: string;
   name: string;
   description: string;
-  status: 'active' | 'coming-soon' | 'ended';
-  releaseDate: Date;
-  endDate?: Date;
+  status: 'ACTIVE' | 'COMING_SOON' | 'ENDED';
+  releaseDate: string;
+  endDate?: string;
   bannerImage: string;
-  themeColors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-  };
-  products: IDropProduct[];
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  createdAt: string;
+  updatedAt: string;
+  products: DropProduct[];
 }
 
-export interface IDropProduct {
+export interface DropProduct {
   id: string;
+  dropId: string;
+  productId: string;
+  dropPrice?: number;
+  isLimited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  product: Product;
+  drop: Drop;
+}
+
+export interface CreateDropData {
   name: string;
-  price: number;
-  cover: string;
-  category: string;
-  isLimited?: boolean;
-  stock?: number;
+  description: string;
+  status?: 'ACTIVE' | 'COMING_SOON' | 'ENDED';
+  releaseDate: string;
+  endDate?: string;
+  bannerImage: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
 }

@@ -4,99 +4,61 @@ import Button from "@components/ui/Button";
 import Title from "@components/ui/Title.astro";
 import ProductCard from "@components/productCard/ProductCard";
 import ClientLayout from "@layouts/ClientLayout.astro";
-import type { IProduct } from "../types/product";
+import type { Product } from "../types/product";
+import { productService } from "src/services/productService";
 
 export const prerender = false;
 
 export const currencyType = "€";
 
-const productsNewCollection: IProduct[] = [
-    {
-        cover: "",
-        currencyType: currencyType,
-        name: "Product 01",
-        price: 0,
-    },
-    {
-        cover: "",
-        currencyType: currencyType,
-        name: "Product 02",
-        price: 0,
-    },
-    {
-        cover: "",
-        currencyType: currencyType,
-        name: "Product 03",
-        price: 0,
-    },
-    {
-        cover: "",
-        currencyType: currencyType,
-        name: "Product 04",
-        price: 0,
-    },
-    {
-        cover: "",
-        currencyType: currencyType,
-        name: "Product 05",
-        price: 0,
-    },
-];
+let productsNewCollection: Product[] = [];
+let topSalesProducts: Product[] = [];
+let errorMessage = "";
 
-// Productos para el slider TOP SALES
-const topSalesProducts: IProduct[] = [
-    {
-        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Professional Boxing Gloves",
-        price: 89.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Muay Thai Shorts",
-        price: 45.5,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Heavy Training Bag",
-        price: 199.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Hand Wraps Set",
-        price: 12.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Shin Guards Pro",
-        price: 67.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Focus Mitts",
-        price: 34.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "Training Gloves",
-        price: 55.99,
-    },
-    {
-        cover: "https://images.unsplash.com/photo-1581009137042-c552e485697a?w=400&h=400&fit=crop&crop=center",
-        currencyType: currencyType,
-        name: "MMA Shorts",
-        price: 42.5,
-    },
-];
+try {
+    // Obtener productos nuevos
+    productsNewCollection = await productService.getNewProducts();
+
+    // Obtener productos más vendidos
+    topSalesProducts = await productService.getTopSaleProducts();
+
+    console.log("Load Products:", {
+        news: productsNewCollection.length,
+        topSales: topSalesProducts.length,
+    });
+} catch (error) {
+    console.error("Error to loading products:", error);
+    errorMessage = "Error to loading products. View example content.";
+
+    // Fallback, example data for api failed
+    topSalesProducts = [
+        {
+            id: "fallback-1",
+            name: "Professional Boxing Gloves",
+            price: 89.99,
+            cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
+            currencyType: currencyType,
+            category: "equipment",
+            stock: 10,
+            isNew: false,
+            isTopSale: true,
+            isLimited: false,
+            createdAt: "",
+            updatedAt: "",
+        },
+    ];
+}
 ---
 
 <ClientLayout>
+    {
+        errorMessage && (
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+                <p class="text-sm">{errorMessage}</p>
+            </div>
+        )
+    }
+
     <!-- Hero -->
     <section class="h-[calc(100vh-50px)] relative">
         <img
@@ -120,7 +82,7 @@ const topSalesProducts: IProduct[] = [
                     Everything you need to evolve into your martial art
                 </h2>
             </div>
-            <Button text="EXPLORE OUR VISION" type="secundary" href="/shop"/>
+            <Button text="EXPLORE OUR VISION" type="secundary" href="/shop" />
         </div>
     </section>
 
@@ -166,12 +128,12 @@ const topSalesProducts: IProduct[] = [
         >
             {
                 productsNewCollection.length === 0 ? (
-                    <span class="animate-pulse color-(--)">
-                        You must add a new collection to display your main
-                        products.
+                    <span class="animate-pulse text-gray-500">
+                        {errorMessage ||
+                            "No new products available at the moment."}
                     </span>
                 ) : (
-                    productsNewCollection.map((product: IProduct) => (
+                    productsNewCollection.map((product: Product) => (
                         <ProductCard
                             server:defer
                             cover={product.cover}
@@ -223,15 +185,26 @@ const topSalesProducts: IProduct[] = [
     <!-- TOP SALES -->
     <section class="min-h-30 px-24 py-24">
         <div class="text-center">
-            <Title isPrimary={false}>
-                TOP SALES
-            </Title>
+            <Title isPrimary={false}> TOP SALES </Title>
         </div>
-        <Slider
-            products={topSalesProducts}
-            title="TOP SALES"
-            autoplay={true}
-            client:load
-        />
+        <section class="py-16">
+            {
+                topSalesProducts.length === 0 ? (
+                    <div class="text-center py-16">
+                        <p class="text-gray-500 text-lg">
+                            {errorMessage ||
+                                "There are no products on offer at this time."}
+                        </p>
+                    </div>
+                ) : (
+                    <Slider
+                        products={topSalesProducts}
+                        title="TOP SALES"
+                        autoplay={true}
+                        client:load
+                    />
+                )
+            }
+        </section>
     </section>
 </ClientLayout>

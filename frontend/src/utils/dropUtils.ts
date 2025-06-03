@@ -1,7 +1,7 @@
-import type { IDrop } from '../types/drop';
+import type { Drop } from '../types/drop';
 
 // Simulación de datos de la base de datos
-const mockDropsData: IDrop[] = [
+const mockDropsData: Drop[] = [
   {
     id: "dragon-collection",
     name: "DRAGON COLLECTION",
@@ -139,7 +139,7 @@ const mockDropsData: IDrop[] = [
   }
 ];
 
-export async function getDropsFromDB(): Promise<IDrop[]> {
+export async function getDropsFromDB(): Promise<Drop[]> {
   // Simular delay de API/BD
   await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -150,27 +150,27 @@ export async function getDropsFromDB(): Promise<IDrop[]> {
   return mockDropsData;
 }
 
-export async function getActiveDrops(): Promise<IDrop[]> {
+export async function getActiveDrops(): Promise<Drop[]> {
   const drops = await getDropsFromDB();
-  return drops.filter((drop: IDrop) => drop.status === 'active');
+  return drops.filter((drop: Drop) => drop.status === 'active');
 }
 
-export async function getComingSoonDrops(): Promise<IDrop[]> {
+export async function getComingSoonDrops(): Promise<Drop[]> {
   const drops = await getDropsFromDB();
-  return drops.filter((drop: IDrop) => drop.status === 'coming-soon');
+  return drops.filter((drop: Drop) => drop.status === 'coming-soon');
 }
 
-export async function getEndedDrops(): Promise<IDrop[]> {
+export async function getEndedDrops(): Promise<Drop[]> {
   const drops = await getDropsFromDB();
-  return drops.filter((drop: IDrop) => drop.status === 'ended');
+  return drops.filter((drop: Drop) => drop.status === 'ended');
 }
 
-export async function getDropById(id: string): Promise<IDrop | undefined> {
+export async function getDropById(id: string): Promise<Drop | undefined> {
   const drops = await getDropsFromDB();
-  return drops.find((drop: IDrop) => drop.id === id);
+  return drops.find((drop: Drop) => drop.id === id);
 }
 
-export async function getFeaturedDrops(): Promise<IDrop[]> {
+export async function getFeaturedDrops(): Promise<Drop[]> {
   const drops = await getDropsFromDB();
-  return drops.filter((drop: IDrop) => drop.status !== 'ended');
+  return drops.filter((drop: Drop) => drop.status !== 'ended');
 }
