@@ -1,0 +1,51 @@
+---
+import ClientLayout from "@layouts/ClientLayout.astro";
+import ProductDetails from "@components/product/ProductDetails";
+import { productService } from "src/services/productService";
+import type { Product } from "src/types/product";
+import { nameToSlug } from "src/utils/slug";
+
+export const prerender = false;
+
+// Función para buscar producto por slug
+async function findProductBySlug(slug: string): Promise<Product | null> {
+    const allProducts = await productService.getAllProducts();
+    return allProducts.find(product => nameToSlug(product.name) === slug) || null;
+}
+
+const { slug } = Astro.params;
+
+if (!slug) {
+    return Astro.redirect("/shop");
+}
+
+let product: Product | null = null;
+let relatedProducts: Product[] = [];
+
+try {
+    // Buscar producto por slug (nombre convertido)
+    product = await findProductBySlug(slug);
+
+    if (!product) {
+        return Astro.redirect("/shop");
+    }
+
+    // Obtener productos relacionados de la misma categoría
+    const categoryProducts = await productService.getProductsByCategory(product.category);
+    relatedProducts = categoryProducts
+        .filter(p => p.id !== product!.id)
+        .slice(0, 4);
+
+} catch (error) {
+    console.error("Error al cargar producto:", error);
+    return Astro.redirect("/shop");
+}
+---
+
+<ClientLayout>
+    <ProductDetails
+        product={product}
+        relatedProducts={relatedProducts}
+        client:load
+    />
+</ClientLayout>

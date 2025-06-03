@@ -2,7 +2,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { Product } from "../../types/product";
-import ProductCard from "@components/productCard/ProductCard";
+import ProductCard from "@components/product/ProductCard";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -61,10 +61,9 @@ export default function Slider({
                 }}
                 className="product-slider-enhanced"
             >
-                {products.map((product, index) => (
-                    <SwiperSlide key={index}>
+                {products.map((product) => (
+                    <SwiperSlide key={product.id}>
                         <ProductCard
-                            key={index.toString()}
                             cover={product.cover}
                             name={product.name}
                             currencyType={product.currencyType}

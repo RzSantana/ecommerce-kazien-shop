@@ -2,7 +2,7 @@
 import Slider from "@components/ui/Slider";
 import Button from "@components/ui/Button";
 import Title from "@components/ui/Title.astro";
-import ProductCard from "@components/productCard/ProductCard";
+import ProductCard from "@components/product/ProductCard";
 import ClientLayout from "@layouts/ClientLayout.astro";
 import type { Product } from "../types/product";
 import { productService } from "src/services/productService";
@@ -127,22 +127,14 @@ try {
             class="flex flex-wrap gap-12 2xl:px-80 minh-96 justify-center items-center"
         >
             {
-                productsNewCollection.length === 0 ? (
-                    <span class="animate-pulse text-gray-500">
-                        {errorMessage ||
-                            "No new products available at the moment."}
-                    </span>
-                ) : (
-                    productsNewCollection.map((product: Product) => (
-                        <ProductCard
-                            server:defer
-                            cover={product.cover}
-                            currencyType={product.currencyType}
-                            name={product.name}
-                            price={product.price}
-                        />
-                    ))
-                )
+                productsNewCollection.map((product: Product) => (
+                    <ProductCard
+                        cover={product.cover}
+                        currencyType={product.currencyType}
+                        name={product.name}
+                        price={product.price}
+                    />
+                ))
             }
         </div>
     </section>

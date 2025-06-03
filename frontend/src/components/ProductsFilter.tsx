@@ -1,7 +1,7 @@
 // components/ProductsFilter.tsx
 import { useState, useMemo, type ChangeEvent } from "react";
 import Select from "@components/ui/Select";
-import ProductCardReact from "@components/productCard/ProductCard";
+import ProductCard from "@components/product/ProductCard";
 
 interface Product {
     id: string;
@@ -96,8 +96,7 @@ export default function ProductsFilter({
             {/* Grid de productos */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredAndSortedProducts.map((product) => (
-                    <ProductCardReact
-                        key={product.id}
+                    <ProductCard
                         name={product.name}
                         price={product.price}
                         currencyType={currencyType}

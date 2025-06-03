@@ -1,7 +1,6 @@
 import Button from "@components/ui/Button";
-import ProductCard from "@components/productCard/ProductCard";
 import type { Drop } from "../types/drop";
-import { ProductWithBadges } from "./productCard/ProductWithBadges";
+import { ProductWithBadges } from "./product/ProductWithBadges";
 
 interface DropSectionProps {
     drop: Drop;
@@ -9,8 +8,10 @@ interface DropSectionProps {
 }
 
 export default function DropSection({ drop, currencyType }: DropSectionProps) {
-    const isComingSoon = drop.status === "coming-soon";
-    const isEnded = drop.status === "ended";
+    const isComingSoon = drop.status === "COMING_SOON";
+    const isEnded = drop.status === "ENDED";
+
+    type StatusConfigKey = 'coming-soon' | 'ended' | 'active';
 
     // Configuración centralizada por estado
     const statusConfig = {
@@ -19,7 +20,7 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
-            }).format(drop.releaseDate)}`,
+            }).format(new Date(drop.releaseDate))}`,
             buttonText: "NOTIFY ME",
             buttonType: "outline" as const,
         },
@@ -35,7 +36,7 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
         },
     };
 
-    const config = statusConfig[drop.status];
+    const config = statusConfig[drop.status.toLowerCase().replace('_', '-') as StatusConfigKey];
 
     // Clases base reutilizables
     const badgeBaseClass =
