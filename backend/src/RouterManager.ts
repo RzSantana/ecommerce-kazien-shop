@@ -4,15 +4,16 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logMiddleware } from "./utils/Log/logMiddleware";
 import { ProductController } from "./features/product/ProductController";
 import { DropController } from "./features/drop/DropController";
+import { AuthController } from "./features/auth/AuthController";
 import { DatabaseManager } from "./database/DatabaseManager";
 
 export class RouterManager {
     private app: Hono;
     private productController = new ProductController();
     private dropController = new DropController();
+    private authController = new AuthController();
     private dbManager = DatabaseManager.getInstance();
 
     public constructor(app: Hono) {
@@ -23,9 +24,14 @@ export class RouterManager {
         // Conectar a la base de datos
         await this.dbManager.connect();
 
-        // Middleware
-        this.app.use("*", cors());
-        this.app.use(logMiddleware);
+        // CORS simplificado
+        this.app.use(
+            "*",
+            cors({
+                origin: "*",
+                credentials: true,
+            })
+        );
 
         // Rutas básicas
         this.app.get("/", (ctx) =>
@@ -34,6 +40,27 @@ export class RouterManager {
         this.app.get("/health", (ctx) =>
             ctx.json({ status: "ok", timestamp: new Date() })
         );
+
+        // TEST ENDPOINT para verificar JSON
+        this.app.post("/test-json", async (ctx) => {
+            try {
+                const data = await ctx.req.json();
+                console.log("✅ Test JSON received:", data);
+                return ctx.json({ success: true, received: data });
+            } catch (error) {
+                console.error("❌ Test JSON failed:", error);
+                return ctx.json({ success: false, error: { error } }, 400);
+            }
+        });
+
+        // Rutas de autenticación (SIN MIDDLEWARE adicional)
+        this.app.post("/api/auth/register", (ctx) =>
+            this.authController.register(ctx)
+        );
+        this.app.post("/api/auth/login", (ctx) =>
+            this.authController.login(ctx)
+        );
+        this.app.get("/api/auth/me", (ctx) => this.authController.me(ctx));
 
         // Rutas de productos
         this.app.get("/api/products", (ctx) =>
@@ -94,12 +121,14 @@ export class RouterManager {
             ctx.json({ success: false, error: "Not found" }, 404)
         );
         this.app.onError((err, ctx) => {
-            console.error(err);
+            console.error("🔥 Server Error:", err);
             return ctx.json(
                 { success: false, error: "Internal server error" },
                 500
             );
         });
+
+        console.log("✅ RouterManager configured successfully");
     }
 
     public async shutdown() {

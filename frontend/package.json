@@ -12,7 +12,7 @@
         "@astrojs/node": "^9.2.2",
         "@astrojs/react": "^4.3.0",
         "@astrojs/vercel": "^8.1.4",
-        "@auth/core": "^0.37.4",
+        "@auth/core": "^0.39.1",
         "@fontsource-variable/onest": "^5.2.8",
         "@fontsource-variable/oswald": "^5.2.5",
         "@fortawesome/fontawesome-svg-core": "^6.7.2",
