@@ -1,6 +1,12 @@
 ---
 import Button from "./ui/Button";
 import { ActionsHeaderClient } from "@components/ActionsHeaderClient";
+import { getSession } from "auth-astro/server";
+
+export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
 ---
 
 <header class="box-border
@@ -34,7 +40,10 @@ import { ActionsHeaderClient } from "@components/ActionsHeaderClient";
 
         <!-- Acciones -->
         <div class="flex flex-row justify-end gap-4">
-            <ActionsHeaderClient client:load />
+            <ActionsHeaderClient
+                session={session}
+                client:load
+            />
         </div>
     </div>
 </header>

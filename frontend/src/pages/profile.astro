@@ -1,0 +1,110 @@
+---
+import ClientLayout from "@layouts/ClientLayout.astro";
+import { getSession } from "auth-astro/server";
+import Button from "@components/ui/Button";
+
+export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
+
+// Si no hay sesión, redirigir al login
+if (!session?.user) {
+    return Astro.redirect("/auth/login");
+}
+
+const user = session.user;
+---
+
+<ClientLayout>
+    <div class="pt-32 px-4 max-w-4xl mx-auto">
+        <!-- Navegación de vuelta -->
+        <div class="mb-8 w-fit">
+            <Button text="← Back to Home" type="link" href="/" />
+        </div>
+
+        <!-- Contenido del perfil -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    User Profile
+                </h1>
+                <p class="text-gray-600">
+                    Manage your account information
+                </p>
+            </div>
+
+            <!-- Información del usuario -->
+            <div class="space-y-6">
+                {user.image && (
+                    <div class="flex justify-center">
+                        <img
+                            src={user.image}
+                            alt="Profile picture"
+                            class="w-24 h-24 rounded-full border-4 border-gray-200"
+                        />
+                    </div>
+                )}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Full Name
+                        </label>
+                        <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
+                            {user.name || "Not provided"}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
+                            {user.email || "Not provided"}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de información adicional -->
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        Account Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Account Type
+                            </label>
+                            <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
+                                Standard User
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Member Since
+                            </label>
+                            <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones del perfil -->
+                <div class="border-t pt-6 flex gap-4 justify-center">
+                    <Button
+                        text="Continue Shopping"
+                        type="primary"
+                        href="/shop"
+                    />
+                    <Button
+                        text="View Orders"
+                        type="outline"
+                        href="/orders"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</ClientLayout>
