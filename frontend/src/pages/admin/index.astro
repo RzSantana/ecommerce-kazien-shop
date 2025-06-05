@@ -1,0 +1,251 @@
+---
+import AdminLayout from "@layouts/AdminLayout.astro";
+import { API_CONFIG } from "src/config/api";
+import { getSession } from "auth-astro/server";
+
+export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
+const userWithRole = session?.user as any;
+
+// Obtener estadísticas del dashboard
+let stats = null;
+let error = null;
+
+try {
+    if (userWithRole?.id) {
+        const response = await fetch(
+            `${API_CONFIG.BASE_URL}/api/admin/dashboard`,
+            {
+                headers: {
+                    "X-User-ID": userWithRole.id, // Usar ID real del usuario
+                },
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            stats = data.data;
+        } else {
+            throw new Error("Failed to fetch dashboard stats");
+        }
+    } else {
+        throw new Error("No user session found");
+    }
+} catch (e) {
+    error = "Error loading dashboard data";
+    console.error("Dashboard error:", e);
+
+    // Fallback data
+    stats = {
+        users: { total: 0, label: "Total Users" },
+        products: { total: 0, lowStock: 0, label: "Products" },
+        drops: { total: 0, active: 0, label: "Collections" },
+    };
+}
+---
+
+<AdminLayout title="Dashboard">
+    {
+        error && (
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                {error} - Check that backend is running and user is
+                authenticated
+            </div>
+        )
+    }
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Users Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div
+                        class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a4 4 0 11-8 0"
+                            ></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            {stats?.users.label}
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {stats?.users.total || 0}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div
+                        class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                            ></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            {stats?.products.label}
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {stats?.products.total || 0}
+                        </dd>
+                        {
+                            stats?.products.lowStock > 0 && (
+                                <dd class="text-sm text-orange-600">
+                                    {stats.products.lowStock} low stock
+                                </dd>
+                            )
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drops Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div
+                        class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                            ></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            {stats?.drops.label}
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {stats?.drops.total || 0}
+                        </dd>
+                        <dd class="text-sm text-green-600">
+                            {stats?.drops.active || 0} active
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a
+                    href="/admin/products"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                >
+                    <div class="text-sm font-medium text-gray-900">
+                        Manage Products
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Add, edit, or remove products
+                    </div>
+                </a>
+
+                <a
+                    href="/admin/users"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                >
+                    <div class="text-sm font-medium text-gray-900">
+                        Manage Users
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        View and manage user accounts
+                    </div>
+                </a>
+
+                <a
+                    href="/admin/drops"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                >
+                    <div class="text-sm font-medium text-gray-900">
+                        Manage Collections
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Create and manage drops
+                    </div>
+                </a>
+
+                <a
+                    href="/"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                >
+                    <div class="text-sm font-medium text-gray-900">
+                        View Site
+                    </div>
+                    <div class="text-xs text-gray-500">Go to customer view</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Info (remove in production) -->
+    {
+        import.meta.env.DEV && (
+            <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
+                <>
+                    <strong>Debug Info:</strong>
+                    <br />
+                </>
+                User ID: {userWithRole?.id || "No user ID"}
+                <br />
+                User Role: {userWithRole?.role || "No role"}
+                <br />
+                Session: {session ? "Exists" : "Missing"}
+                <br />
+                API URL: {API_CONFIG.BASE_URL}
+            </div>
+        )
+    }
+</AdminLayout>

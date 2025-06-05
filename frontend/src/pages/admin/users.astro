@@ -1,0 +1,62 @@
+---
+import AdminLayout from "@layouts/AdminLayout.astro";
+import AdminUsersManager from "@components/admin/AdminUsersManager";
+import { API_CONFIG } from "src/config/api";
+import { getSession } from "auth-astro/server";
+
+export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
+const userWithRole = session?.user as any;
+
+// Obtener usuarios
+let users = [];
+let error = null;
+
+try {
+    if (userWithRole?.id) {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/users`, {
+            headers: {
+                'X-User-ID': userWithRole.id // Usar ID real del usuario
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            users = data.data || [];
+        } else {
+            throw new Error('Failed to fetch users');
+        }
+    } else {
+        throw new Error('No user session found');
+    }
+} catch (e) {
+    error = 'Error loading users';
+    console.error('Users error:', e);
+}
+---
+
+<AdminLayout title="Users Management">
+    {error && (
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error} - Check that backend is running and user is authenticated
+        </div>
+    )}
+
+    <AdminUsersManager
+        users={users}
+        currentUserId={userWithRole?.id}
+        client:load
+    />
+
+    <!-- Debug Info (remove in production) -->
+    {import.meta.env.DEV && (
+        <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
+            <strong>Debug Info:</strong><br/>
+            Current User ID: {userWithRole?.id || 'No user ID'}<br/>
+            Users loaded: {users.length}<br/>
+            API URL: {API_CONFIG.BASE_URL}
+        </div>
+    )}
+</AdminLayout>

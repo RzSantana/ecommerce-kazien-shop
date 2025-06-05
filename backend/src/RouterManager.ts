@@ -7,13 +7,16 @@ import { cors } from "hono/cors";
 import { ProductController } from "./features/product/ProductController";
 import { DropController } from "./features/drop/DropController";
 import { AuthController } from "./features/auth/AuthController";
+import { AdminController } from "./features/admin/AdminController";
 import { DatabaseManager } from "./database/DatabaseManager";
+import { adminMiddleware } from "./utils/middleware/adminMiddleware";
 
 export class RouterManager {
     private app: Hono;
     private productController = new ProductController();
     private dropController = new DropController();
     private authController = new AuthController();
+    private adminController = new AdminController();
     private dbManager = DatabaseManager.getInstance();
 
     public constructor(app: Hono) {
@@ -116,6 +119,20 @@ export class RouterManager {
             this.dropController.getDropProducts(ctx)
         );
 
+        // Rutas de administración (PROTEGIDAS)
+        this.app.get("/api/admin/dashboard", adminMiddleware, (ctx) =>
+            this.adminController.getDashboard(ctx)
+        );
+        this.app.get("/api/admin/users", adminMiddleware, (ctx) =>
+            this.adminController.getAllUsers(ctx)
+        );
+        this.app.put("/api/admin/users/:id/role", adminMiddleware, (ctx) =>
+            this.adminController.updateUserRole(ctx)
+        );
+        this.app.delete("/api/admin/users/:id", adminMiddleware, (ctx) =>
+            this.adminController.deleteUser(ctx)
+        );
+
         // Manejo de errores
         this.app.notFound((ctx) =>
             ctx.json({ success: false, error: "Not found" }, 404)
@@ -129,6 +146,7 @@ export class RouterManager {
         });
 
         console.log("✅ RouterManager configured successfully");
+        console.log("🔒 Admin routes protected with adminMiddleware");
     }
 
     public async shutdown() {
