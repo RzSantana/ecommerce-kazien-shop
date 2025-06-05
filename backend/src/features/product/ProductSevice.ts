@@ -5,25 +5,31 @@ import { CreateProductData, UpdateProductData } from "./interfaces";
 export class ProductService {
     private db = DatabaseManager.getInstance().getClient();
 
-     public async createProduct(data: CreateProductData): Promise<Product> {
+    public async createProduct(data: CreateProductData): Promise<Product> {
         return await this.db.product.create({
             data: {
                 name: data.name,
                 price: data.price,
                 cover: data.cover,
-                category: data.category,
+                categoryId: data.categoryId,
                 description: data.description,
                 stock: data.stock || 0,
                 isNew: data.isNew || false,
                 isTopSale: data.isTopSale || false,
                 isLimited: data.isLimited || false,
                 currencyType: data.currencyType || "€"
+            },
+            include: {
+                category: true // Incluir información de la categoría
             }
         });
     }
 
     public async getAllProducts(): Promise<Product[]> {
         return await this.db.product.findMany({
+            include: {
+                category: true // Incluir información de la categoría
+            },
             orderBy: { createdAt: 'desc' }
         });
     }
@@ -32,6 +38,7 @@ export class ProductService {
         return await this.db.product.findUnique({
             where: { id },
             include: {
+                category: true, // Incluir información de la categoría
                 dropProducts: {
                     include: {
                         drop: true
@@ -44,7 +51,10 @@ export class ProductService {
     public async updateProduct(id: string, data: UpdateProductData): Promise<Product> {
         return await this.db.product.update({
             where: { id },
-            data
+            data,
+            include: {
+                category: true // Incluir información de la categoría
+            }
         });
     }
 
@@ -54,9 +64,12 @@ export class ProductService {
         });
     }
 
-    public async getProductsByCategory(category: string): Promise<Product[]> {
+    public async getProductsByCategory(categoryId: string): Promise<Product[]> {
         return await this.db.product.findMany({
-            where: { category },
+            where: { categoryId },
+            include: {
+                category: true // Incluir información de la categoría
+            },
             orderBy: { createdAt: 'desc' }
         });
     }
@@ -68,6 +81,9 @@ export class ProductService {
                     { name: { contains: search } },
                     { description: { contains: search } }
                 ]
+            },
+            include: {
+                category: true // Incluir información de la categoría
             },
             orderBy: { createdAt: 'desc' }
         });

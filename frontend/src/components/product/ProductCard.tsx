@@ -26,7 +26,7 @@ export default function ProductCard({
                         src={cover}
                         alt={name || "Product"}
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full aspect-2/1 object-cover select-none"
                     />
                 </picture>
             )}

@@ -1,0 +1,42 @@
+---
+import AdminCategoriesManager from "@components/admin/AdminCategoryManager";
+import AdminLayout from "@layouts/AdminLayout.astro";
+import { getSession } from "auth-astro/server";
+import type { Category } from "src/types/category";
+
+export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
+const userWithRole = session?.user as any;
+
+// Obtener categorías
+let categories: Category[] = [];
+let error = null;
+
+try {
+    // Simular categorías por ahora hasta implementar el backend completo
+    categories = [
+        { id: "1", name: "Electronics", description: "Electronic devices and gadgets", isActive: true, _count: { products: 5 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
+        { id: "2", name: "Clothing", description: "Apparel and fashion items", isActive: true, _count: { products: 12 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
+        { id: "3", name: "Sports", description: "Sports equipment and gear", isActive: true, _count: { products: 8 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
+        { id: "4", name: "Accessories", description: "Various accessories", isActive: false, _count: { products: 0 }, createdAt: new Date().toString(), updatedAt: new Date().toString() }
+    ];
+} catch (e) {
+    error = 'Error loading categories';
+    console.error('Categories error:', e);
+}
+---
+
+<AdminLayout title="Categories Management">
+    {error && (
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+        </div>
+    )}
+
+    <AdminCategoriesManager
+        categories={categories}
+        client:load
+    />
+</AdminLayout>

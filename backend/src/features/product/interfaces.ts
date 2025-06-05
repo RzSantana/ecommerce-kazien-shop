@@ -1,9 +1,8 @@
-
 export interface CreateProductData {
     name: string;
     price: number;
     cover: string;
-    category: string;
+    categoryId: string; // Cambiar de category a categoryId
     description?: string;
     stock?: number;
     isNew?: boolean;
@@ -16,7 +15,7 @@ export interface UpdateProductData {
     name?: string;
     price?: number;
     cover?: string;
-    category?: string;
+    categoryId?: string; // Cambiar de category a categoryId
     description?: string;
     stock?: number;
     isNew?: boolean;

@@ -1,4 +1,4 @@
-// components/ProductsFilter.tsx
+// components/ProductsFilter.tsx (ACTUALIZADO)
 import { useState, useMemo, type ChangeEvent } from "react";
 import Select from "@components/ui/Select";
 import ProductCard from "@components/product/ProductCard";
@@ -8,7 +8,11 @@ interface Product {
     name: string;
     price: number;
     cover: string;
-    category: string;
+    categoryId: string;
+    category?: {
+        id: string;
+        name: string;
+    };
 }
 
 interface ProductsFilterProps {
@@ -23,12 +27,21 @@ export default function ProductsFilter({
     const [selectedCategory, setSelectedCategory] = useState("");
     const [sortBy, setSortBy] = useState("newest");
 
-    // Opciones para los selects
-    const categoryOptions = [
-        { value: "T-Shirts", label: "T-Shirts" },
-        { value: "Shorts", label: "Shorts" },
-        { value: "Accessories", label: "Accessories" },
-    ];
+    // Generar opciones de categorías dinámicamente desde los productos
+    const categoryOptions = useMemo(() => {
+        const uniqueCategories = new Map();
+
+        products.forEach((product) => {
+            if (product.category) {
+                uniqueCategories.set(product.category.id, {
+                    value: product.category.id,
+                    label: product.category.name,
+                });
+            }
+        });
+
+        return Array.from(uniqueCategories.values());
+    }, [products]);
 
     const sortOptions = [
         { value: "newest", label: "Newest" },
@@ -43,7 +56,7 @@ export default function ProductsFilter({
         // Filtrar por categoría
         if (selectedCategory) {
             filtered = filtered.filter(
-                (product) => product.category === selectedCategory
+                (product) => product.category?.id === selectedCategory
             );
         }
 
@@ -97,6 +110,7 @@ export default function ProductsFilter({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredAndSortedProducts.map((product) => (
                     <ProductCard
+                        key={product.id}
                         name={product.name}
                         price={product.price}
                         currencyType={currencyType}

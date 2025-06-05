@@ -8,6 +8,7 @@ import { ProductController } from "./features/product/ProductController";
 import { DropController } from "./features/drop/DropController";
 import { AuthController } from "./features/auth/AuthController";
 import { AdminController } from "./features/admin/AdminController";
+import { CategoryController } from "./features/category/CategoryController";
 import { DatabaseManager } from "./database/DatabaseManager";
 import { adminMiddleware } from "./utils/middleware/adminMiddleware";
 
@@ -17,6 +18,7 @@ export class RouterManager {
     private dropController = new DropController();
     private authController = new AuthController();
     private adminController = new AdminController();
+    private categoryController = new CategoryController();
     private dbManager = DatabaseManager.getInstance();
 
     public constructor(app: Hono) {
@@ -131,6 +133,23 @@ export class RouterManager {
         );
         this.app.delete("/api/admin/users/:id", adminMiddleware, (ctx) =>
             this.adminController.deleteUser(ctx)
+        );
+
+        // Rutas de categorías
+        this.app.get("/api/categories", (ctx) =>
+            this.categoryController.getAllCategories(ctx)
+        );
+        this.app.get("/api/categories/active", (ctx) =>
+            this.categoryController.getActiveCategories(ctx)
+        );
+        this.app.post("/api/categories", adminMiddleware, (ctx) =>
+            this.categoryController.createCategory(ctx)
+        );
+        this.app.put("/api/categories/:id", adminMiddleware, (ctx) =>
+            this.categoryController.updateCategory(ctx)
+        );
+        this.app.delete("/api/categories/:id", adminMiddleware, (ctx) =>
+            this.categoryController.deleteCategory(ctx)
         );
 
         // Manejo de errores

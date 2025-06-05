@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "@components/ui/Button";
 import type { Product } from "src/types/product";
 import { productService } from "src/services/productService";
@@ -14,6 +14,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
     const [error, setError] = useState("");
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [categories, setCategories] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -27,6 +28,28 @@ export default function AdminProductsManager({ products: initialProducts, curren
         isLimited: false
     });
 
+    // Cargar categorías al montar el componente
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                // Categorías específicas para artes marciales
+                setCategories([
+                    { id: "boxing-gloves", name: "Boxing Gloves" },
+                    { id: "mma-gloves", name: "MMA Gloves" },
+                    { id: "rashguards", name: "Rashguards" },
+                    { id: "fight-shorts", name: "Fight Shorts" },
+                    { id: "protective-gear", name: "Protective Gear" },
+                    { id: "training-equipment", name: "Training Equipment" },
+                    { id: "brazilian-jiu-jitsu", name: "Brazilian Jiu-Jitsu" },
+                    { id: "accessories", name: "Accessories" }
+                ]);
+            } catch (error) {
+                console.error("Error loading categories:", error);
+            }
+        };
+        loadCategories();
+    }, []);
+
     const handleDeleteProduct = async (productId: string) => {
         if (!confirm("Are you sure you want to delete this product?")) return;
 
@@ -35,6 +58,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
             const success = await productService.deleteProduct(productId);
             if (success) {
                 setProducts(products.filter(p => p.id !== productId));
+                showToast("Product deleted successfully", "success");
             } else {
                 setError("Failed to delete product");
             }
@@ -64,11 +88,22 @@ export default function AdminProductsManager({ products: initialProducts, curren
 
     const handleEditProduct = (product: Product) => {
         setEditingProduct(product);
+
+        // Extraer el ID de la categoría de forma segura
+        let categoryId = "";
+        if (typeof product.category === "object" && product.category?.id) {
+            categoryId = product.category.id;
+        } else if (typeof product.category === "string") {
+            categoryId = product.category;
+        } else if (product.categoryId) {
+            categoryId = product.categoryId;
+        }
+
         setFormData({
             name: product.name,
             price: product.price.toString(),
             cover: product.cover,
-            category: product.category,
+            category: categoryId,
             description: product.description || "",
             stock: product.stock.toString(),
             currencyType: product.currencyType,
@@ -88,7 +123,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
                 name: formData.name,
                 price: parseFloat(formData.price),
                 cover: formData.cover,
-                category: formData.category,
+                categoryId: formData.category, // Usar categoryId en lugar de category
                 description: formData.description,
                 stock: parseInt(formData.stock),
                 currencyType: formData.currencyType,
@@ -98,16 +133,16 @@ export default function AdminProductsManager({ products: initialProducts, curren
             };
 
             if (editingProduct) {
-                // Actualizar producto existente
                 const updatedProduct = await productService.updateProduct(editingProduct.id, productData);
                 if (updatedProduct) {
                     setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+                    showToast("Product updated successfully", "success");
                 }
             } else {
-                // Crear nuevo producto
                 const newProduct = await productService.createProduct(productData);
                 if (newProduct) {
                     setProducts([newProduct, ...products]);
+                    showToast("Product created successfully", "success");
                 }
             }
 
@@ -128,6 +163,32 @@ export default function AdminProductsManager({ products: initialProducts, curren
         if (stock === 0) return { text: "Out of Stock", color: "text-red-600" };
         if (stock <= 5) return { text: "Low Stock", color: "text-orange-600" };
         return { text: "In Stock", color: "text-green-600" };
+    };
+
+    const showToast = (message: string, type: "success" | "error") => {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 z-50 p-4 rounded-md text-white font-medium ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    // Función auxiliar para obtener el nombre de la categoría de forma segura
+    const getCategoryName = (product: Product) => {
+        if (typeof product.category === "object" && product.category?.name) {
+            return product.category.name;
+        }
+        if (typeof product.category === "string") {
+            return product.category;
+        }
+        if (product.categoryId) {
+            // Buscar el nombre en las categorías cargadas
+            const found = categories.find(cat => cat.id === product.categoryId);
+            return found?.name || product.categoryId;
+        }
+        return "Unknown Category";
     };
 
     return (
@@ -216,7 +277,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
-                                                {product.category}
+                                                {getCategoryName(product)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -270,7 +331,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
                 )}
             </div>
 
-            {/* Modal de formulario funcional */}
+            {/* Modal de formulario */}
             {showCreateForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
                     <div className="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
@@ -324,10 +385,11 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                         required
                                     >
                                         <option value="">Select category</option>
-                                        <option value="electronics">Electronics</option>
-                                        <option value="clothing">Clothing</option>
-                                        <option value="accessories">Accessories</option>
-                                        <option value="sports">Sports</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 

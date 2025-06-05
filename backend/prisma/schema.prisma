@@ -1,134 +1,150 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+    provider = "mysql"
+    url      = env("DATABASE_URL")
 }
 
 enum DropStatus {
-  ACTIVE
-  COMING_SOON
-  ENDED
+    ACTIVE
+    COMING_SOON
+    ENDED
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  name         String
-  price        Decimal  @db.Decimal(10, 2)
-  cover        String   @db.Text
-  currencyType String   @default("€") @db.VarChar(5)
-  category     String   @db.VarChar(100)
-  description  String?  @db.Text
-  stock        Int      @default(0)
-  isNew        Boolean  @default(false)
-  isTopSale    Boolean  @default(false)
-  isLimited    Boolean  @default(false)
+    id           String  @id @default(cuid())
+    name         String
+    categoryId   String
+    price        Decimal @db.Decimal(10, 2)
+    cover        String  @db.Text
+    currencyType String  @default("€") @db.VarChar(5)
+    description  String? @db.Text
+    stock        Int     @default(0)
+    isNew        Boolean @default(false)
+    isTopSale    Boolean @default(false)
+    isLimited    Boolean @default(false)
 
-  // Timestamps
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  // Relaciones
-  dropProducts DropProduct[]
+    // Relaciones
+    dropProducts DropProduct[]
+    category     Category      @relation(fields: [categoryId], references: [id])
 
-  // Índices
-  @@index([category])
-  @@index([isNew])
-  @@index([isTopSale])
-  @@index([stock])
-  @@fulltext([name, description])
-  @@map("products")
+    // Índices
+    @@index([categoryId])
+    @@index([isNew])
+    @@index([isTopSale])
+    @@index([stock])
+    @@fulltext([name, description])
+    @@map("products")
 }
 
 model Drop {
-  id          String      @id @default(cuid())
-  name        String      @unique @db.VarChar(255)
-  description String      @db.Text
-  status      DropStatus  @default(ACTIVE)
-  releaseDate DateTime
-  endDate     DateTime?
-  bannerImage String      @db.Text
+    id          String     @id @default(cuid())
+    name        String     @unique @db.VarChar(255)
+    description String     @db.Text
+    status      DropStatus @default(ACTIVE)
+    releaseDate DateTime
+    endDate     DateTime?
+    bannerImage String     @db.Text
 
-  // Colores del tema
-  primaryColor   String @db.VarChar(7)
-  secondaryColor String @db.VarChar(7)
-  accentColor    String @db.VarChar(7)
+    // Colores del tema
+    primaryColor   String @db.VarChar(7)
+    secondaryColor String @db.VarChar(7)
+    accentColor    String @db.VarChar(7)
 
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  // Relaciones
-  products    DropProduct[]
+    // Relaciones
+    products DropProduct[]
 
-  @@index([status])
-  @@index([releaseDate])
-  @@map("drops")
+    @@index([status])
+    @@index([releaseDate])
+    @@map("drops")
 }
 
 model DropProduct {
-  id        String  @id @default(cuid())
-  dropId    String
-  productId String
+    id        String @id @default(cuid())
+    dropId    String
+    productId String
 
-  // Campos específicos del producto en el drop
-  dropPrice Decimal? @db.Decimal(10, 2)
-  isLimited Boolean @default(false)
+    // Campos específicos del producto en el drop
+    dropPrice Decimal? @db.Decimal(10, 2)
+    isLimited Boolean  @default(false)
 
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  // Relaciones
-  drop      Drop    @relation(fields: [dropId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    // Relaciones
+    drop    Drop    @relation(fields: [dropId], references: [id], onDelete: Cascade)
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([dropId, productId])
-  @@index([dropId])
-  @@index([productId])
-  @@map("drop_products")
+    @@unique([dropId, productId])
+    @@index([dropId])
+    @@index([productId])
+    @@map("drop_products")
 }
 
+model Category {
+    id          String  @id @default(cuid())
+    name        String  @unique @db.VarChar(100)
+    description String? @db.Text
+    isActive    Boolean @default(true)
+
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relaciones - Los productos ahora referencian categories
+    products Product[]
+
+    @@map("categories")
+}
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("user") // "user" | "admin"
+    id       String @id @default(cuid())
+    email    String @unique
+    password String
+    name     String
+    role     String @default("user") // "user" | "admin"
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  @@map("users")
+    @@map("users")
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
 
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
+    @@unique([provider, providerAccountId])
+    @@map("accounts")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
 
-  @@map("sessions")
+    @@map("sessions")
 }

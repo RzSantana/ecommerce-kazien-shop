@@ -1,10 +1,13 @@
+import type { Category } from "./category";
+
 export interface Product {
   id: string;
   name: string;
   price: number;
   cover: string;
   currencyType: string;
-  category: string;
+  categoryId: string;
+  category: Category; // Ahora es un objeto Category en lugar de string
   description?: string;
   stock: number;
   isNew: boolean;
@@ -18,7 +21,7 @@ export interface CreateProductData {
   name: string;
   price: number;
   cover: string;
-  category: string;
+  categoryId: string; // Cambiar de category a categoryId
   description?: string;
   stock?: number;
   isNew?: boolean;

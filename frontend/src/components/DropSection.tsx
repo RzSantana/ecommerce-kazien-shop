@@ -47,7 +47,7 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
     return (
         <section className="mb-24 pt-20">
             {/* Hero Banner */}
-            <div className="relative h-[500px] mb-12 overflow-hidden bg-gray-900">
+            <div className="relative min-h-[500px] max-h-[600px] mb-12 overflow-hidden bg-gray-900">
                 <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60"></div>
 
                 <img

@@ -120,9 +120,7 @@ export default function ProductDetails({
                                 <button
                                     onClick={() => handleQuantityChange(true)}
                                     disabled={quantity >= product.stock}
-                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    +
+                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
                                 </button>
                             </div>
                             <span className="text-sm text-gray-500">
@@ -153,7 +151,7 @@ export default function ProductDetails({
                         <div className="flex justify-between">
                             <span>Categoría:</span>
                             <span className="capitalize">
-                                {product.category}
+                                {product.category?.name || product.categoryId}
                             </span>
                         </div>
                         <div className="flex justify-between">

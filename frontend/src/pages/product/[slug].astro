@@ -30,8 +30,8 @@ try {
         return Astro.redirect("/shop");
     }
 
-    // Obtener productos relacionados de la misma categoría
-    const categoryProducts = await productService.getProductsByCategory(product.category);
+    // Obtener productos relacionados de la misma categoría - CORREGIDO
+    const categoryProducts = await productService.getProductsByCategory(product.categoryId);
     relatedProducts = categoryProducts
         .filter(p => p.id !== product!.id)
         .slice(0, 4);
