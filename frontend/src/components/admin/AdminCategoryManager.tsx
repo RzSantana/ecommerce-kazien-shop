@@ -2,6 +2,8 @@ import { useState } from "react";
 import Button from "@components/ui/Button";
 import type { Category } from "src/types/category";
 import { categoryService } from "src/services/categoryService";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle, faFolder, faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface AdminCategoriesManagerProps {
     categories: Category[];
@@ -227,13 +229,10 @@ export default function AdminCategoriesManager({
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <div className="flex">
                         <div className="py-1">
-                            <svg
-                                className="fill-current h-6 w-6 text-red-500 mr-4"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                            >
-                                <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" />
-                            </svg>
+                            <FontAwesomeIcon
+                                icon={faExclamationTriangle}
+                                className="h-6 w-6 text-red-500 mr-4"
+                            />
                         </div>
                         <div>
                             <p className="font-bold">Error</p>
@@ -321,10 +320,14 @@ export default function AdminCategoriesManager({
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span
-                                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full items-center ${getStatusColor(
                                                 category.isActive
                                             )}`}
                                         >
+                                            <FontAwesomeIcon
+                                                icon={category.isActive ? faCheckCircle : faTimesCircle}
+                                                className="w-3 h-3 mr-1"
+                                            />
                                             {category.isActive
                                                 ? "Active"
                                                 : "Inactive"}
@@ -379,19 +382,10 @@ export default function AdminCategoriesManager({
                 {categories.length === 0 && (
                     <div className="text-center py-12">
                         <div className="bg-gray-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                            <svg
+                            <FontAwesomeIcon
+                                icon={faFolder}
                                 className="w-12 h-12 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                ></path>
-                            </svg>
+                            />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             No categories found

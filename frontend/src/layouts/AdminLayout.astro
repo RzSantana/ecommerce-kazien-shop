@@ -1,5 +1,4 @@
 ---
-// AdminLayout.astro - SIN verificaciones de autenticación
 // El middleware ya se encarga de eso
 import MainLayout from "./MainLayout.astro";
 import Button from "@components/ui/Button";
@@ -7,8 +6,6 @@ import { getSession } from "auth-astro/server";
 
 export const prerender = false;
 
-// Only get the session to display user info
-// NO verifications or redirects here
 const session = await getSession(Astro.request);
 const { title } = Astro.props;
 const currentPath = Astro.url.pathname;
@@ -47,19 +44,7 @@ const currentPath = Astro.url.pathname;
                                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
                         Dashboard
                     </a>
 
@@ -71,19 +56,7 @@ const currentPath = Astro.url.pathname;
                                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-box w-5 h-5 mr-3"></i>
                         Products
                     </a>
 
@@ -95,19 +68,7 @@ const currentPath = Astro.url.pathname;
                                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-folder w-5 h-5 mr-3"></i>
                         Categories
                     </a>
 
@@ -119,19 +80,7 @@ const currentPath = Astro.url.pathname;
                                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a4 4 0 11-8 0"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-users w-5 h-5 mr-3"></i>
                         Users
                     </a>
 
@@ -143,19 +92,7 @@ const currentPath = Astro.url.pathname;
                                 : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         }`}
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-layer-group w-5 h-5 mr-3"></i>
                         Collections
                     </a>
                 </div>
@@ -173,19 +110,7 @@ const currentPath = Astro.url.pathname;
                         href="/"
                         class="flex items-center px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     >
-                        <svg
-                            class="w-5 h-5 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                            ></path>
-                        </svg>
+                        <i class="fas fa-home w-5 h-5 mr-3"></i>
                         Back to Site
                     </a>
                 </div>
@@ -224,4 +149,7 @@ const currentPath = Astro.url.pathname;
             </main>
         </div>
     </div>
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </MainLayout>
