@@ -16,12 +16,10 @@ try {
     const apiDrops = await dropService.getAllDrops();
 
     // Transformar drops para el frontend
-    dropsData = dropService.transformDropsToFrontend(apiDrops);
-
-    console.log(`Drops cargados: ${dropsData.length}`);
+    dropsData = dropService.transformDropsToFrontend(apiDrops);        console.log(`Drops loaded: ${dropsData.length}`);
 } catch (error) {
-    console.error("Error al cargar drops:", error);
-    errorMessage = "Error al cargar las colecciones.";
+    console.error("Error loading drops:", error);
+    errorMessage = "Error loading collections.";
 
     // Fallback: mostrar mensaje sin drops
     dropsData = [];
@@ -41,15 +39,14 @@ try {
     <section class="text-center py-16">
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-md mx-auto">
         {errorMessage}
-      </div>
-      <p class="text-gray-500">
-        Por favor, intenta nuevamente más tarde o verifica que el servidor esté funcionando.
+      </div>      <p class="text-gray-500">
+        Please try again later or verify that the server is running.
       </p>
     </section>
   ) : dropsData.length === 0 ? (
     <section class="text-center py-16">
       <p class="text-gray-500 text-lg">
-        No hay colecciones disponibles en este momento.
+        No collections available at this time.
       </p>
     </section>
   ) : (

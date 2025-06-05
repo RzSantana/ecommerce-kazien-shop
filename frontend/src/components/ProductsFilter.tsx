@@ -1,4 +1,4 @@
-// components/ProductsFilter.tsx - CON BÚSQUEDA IMPLEMENTADA
+// components/ProductsFilter.tsx - WITH SEARCH IMPLEMENTED
 import { useState, useMemo, useEffect, type ChangeEvent } from "react";
 import Select from "@components/ui/Select";
 import ProductCard from "@components/product/ProductCard";

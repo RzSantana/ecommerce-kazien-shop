@@ -16,7 +16,7 @@ interface SliderProps {
 
 export default function Slider({
     products,
-    title = "TOP VENTAS",
+    title = "TOP SALES",
     autoplay = true,
 }: SliderProps) {
     return (

@@ -18,7 +18,7 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
     const handleQuantityChange = async (newQuantity: number) => {
         setLoading(true);
         try {
-            const success = cartService.updateQuantity(item.id, newQuantity);
+            const success = await cartService.updateQuantity(item.id, newQuantity);
             if (success) {
                 onUpdate();
             }
@@ -27,13 +27,11 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleRemove = async () => {
-        if (confirm(`¿Eliminar ${item.name} del carrito?`)) {
+    };    const handleRemove = async () => {
+        if (confirm(`Remove ${item.name} from cart?`)) {
             setLoading(true);
             try {
-                const success = cartService.removeFromCart(item.id);
+                const success = await cartService.removeFromCart(item.id);
                 if (success) {
                     onUpdate();
                 }
@@ -50,7 +48,7 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
 
     return (
         <div className="flex items-center py-6 border-b border-gray-200 last:border-b-0">
-            {/* Imagen del producto */}
+            {/* Product image */}
             <div className="flex-shrink-0 w-24 h-24 mr-6">
                 <a href={`/product/${productSlug}`}>
                     <img
@@ -62,7 +60,7 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
                 </a>
             </div>
 
-            {/* Información del producto */}
+            {/* Product information */}
             <div className="flex-grow min-w-0">
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                     <div className="flex-grow">
@@ -73,13 +71,12 @@ export default function CartItem({ item, onUpdate }: CartItemProps) {
                             >
                                 {item.name}
                             </a>
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-2">
-                            Precio unitario: {item.price}
+                        </h3>                        <p className="text-sm text-gray-500 mb-2">
+                            Unit price: {item.price}
                             {item.currencyType}
                         </p>
                         <p className="text-sm text-gray-500">
-                            Stock disponible: {item.stock}
+                            Available stock: {item.stock}
                         </p>
                     </div>
 

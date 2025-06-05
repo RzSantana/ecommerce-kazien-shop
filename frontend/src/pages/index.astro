@@ -26,27 +26,8 @@ try {
         news: productsNewCollection.length,
         topSales: topSalesProducts.length,
     });
-} catch (error) {
-    console.error("Error to loading products:", error);
-    errorMessage = "Error to loading products. View example content.";
-
-    // Fallback, example data for api failed
-    topSalesProducts = [
-        {
-            id: "fallback-1",
-            name: "Professional Boxing Gloves",
-            price: 89.99,
-            cover: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop&crop=center",
-            currencyType: currencyType,
-            category: "equipment",
-            stock: 10,
-            isNew: false,
-            isTopSale: true,
-            isLimited: false,
-            createdAt: "",
-            updatedAt: "",
-        },
-    ];
+} catch (error) {    console.error("Error loading products:", error);
+    errorMessage = "Error loading products. Showing example content.";
 }
 ---
 
@@ -65,7 +46,7 @@ try {
             class="w-full h-full object-cover"
             src="/kickboxing-entrenamiento-gimnasio-profesional.webp"
             alt="Kickboxing training in gym - fighter celebrating victory"
-            title="Combate profesional de kickboxing y muay thai"
+            title="Professional kickboxing and muay thai combat"
             loading="eager"
             decoding="async"
             fetchpriority="high"

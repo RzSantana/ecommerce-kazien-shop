@@ -68,17 +68,16 @@ export default function ProductDetails({
 
     // Determinar estado del stock
     const getStockStatus = () => {
-        if (product.stock === 0)
-            return { status: "out", text: "Agotado", color: "text-red-600" };
+        if (product.stock === 0)            return { status: "out", text: "Out of stock", color: "text-red-600" };
         if (product.stock <= 5)
             return {
                 status: "low",
-                text: `Solo ${product.stock} disponibles`,
+                text: `Only ${product.stock} available`,
                 color: "text-orange-600",
             };
         return {
             status: "available",
-            text: "En stock",
+            text: "In stock",
             color: "text-green-600",
         };
     };
@@ -89,7 +88,7 @@ export default function ProductDetails({
         <div className="pt-32 px-4 max-w-7xl mx-auto">
             {/* Navegación de vuelta */}
             <div className="mb-8 w-fit">
-                <Button text="← Volver a la tienda" type="link" href="/shop" />
+                <Button text="← Back to Shop" type="link" href="/shop" />
             </div>
 
             {/* Contenido principal */}
@@ -123,12 +122,11 @@ export default function ProductDetails({
                         </span>
 
                         {/* Mostrar si está en el carrito */}
-                        {isInCart && (
-                            <div className="mt-2">
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    ✓ En el carrito ({cartQuantity})
-                                </span>
-                            </div>
+                        {isInCart && (                    <div className="mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✓ In cart ({cartQuantity})
+                        </span>
+                    </div>
                         )}
                     </div>
 
@@ -175,13 +173,12 @@ export default function ProductDetails({
 
                     {/* Botones de acción */}
                     <div className="pt-4 space-y-3">
-                        <Button
-                            text={
+                        <Button                text={
                                 addingToCart
-                                    ? "Agregando..."
+                                    ? "Adding..."
                                     : stockStatus.status === "out"
-                                    ? "Producto agotado"
-                                    : "Agregar al carrito"
+                                    ? "Out of stock"
+                                    : "Add to cart"
                             }
                             type={
                                 stockStatus.status === "out"
@@ -192,9 +189,8 @@ export default function ProductDetails({
                             disabled={stockStatus.status === "out" || addingToCart}
                         />
 
-                        {isInCart && (
-                            <Button
-                                text="Ver Carrito"
+                        {isInCart && (                            <Button
+                                text="View Cart"
                                 type="outline"
                                 href="/cart"
                             />
@@ -209,14 +205,13 @@ export default function ProductDetails({
                                 {product.category?.name || product.categoryId}
                             </span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Stock disponible:</span>
-                            <span>{product.stock} unidades</span>
+                        <div className="flex justify-between">                            <span>Available stock:</span>
+                            <span>{product.stock} units</span>
                         </div>
                         {cartQuantity > 0 && (
                             <div className="flex justify-between">
-                                <span>En tu carrito:</span>
-                                <span className="font-medium text-green-600">{cartQuantity} unidades</span>
+                                <span>In your cart:</span>
+                                <span className="font-medium text-green-600">{cartQuantity} units</span>
                             </div>
                         )}
                     </div>
@@ -228,7 +223,7 @@ export default function ProductDetails({
                 <section className="border-t pt-16">
                     <Slider
                         products={relatedProducts}
-                        title="PRODUCTOS RELACIONADOS"
+                        title="RELATED PRODUCTS"
                         autoplay={true}
                     />
                 </section>

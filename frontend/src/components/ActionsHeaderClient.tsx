@@ -86,7 +86,7 @@ export function ActionsHeaderClient({ session }: ActionsHeaderClientProps) {
                     />
                 </>
             ) : (
-                // Usuario no logueado - mostrar login
+                // User not logged in - show login
                 <Button text="Login" type="primary" href="/auth/login" />
             )}
         </>

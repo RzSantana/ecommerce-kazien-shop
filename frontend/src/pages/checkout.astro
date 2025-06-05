@@ -1,20 +1,21 @@
 ---
 import ClientLayout from "@layouts/ClientLayout.astro";
-import CartManager from "@components/cart/CartManager";
+import CheckoutForm from "@components/checkout/CheckoutForm";
 
 export const prerender = false;
 ---
 
 <ClientLayout>
     <div class="pt-32 px-4 max-w-6xl mx-auto min-h-screen">
-        <div class="mb-8">            <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                Shopping Cart
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                Checkout
             </h1>
             <p class="text-gray-600">
-                Review and manage your cart items
+                Completa tu compra de forma segura
             </p>
         </div>
 
-        <CartManager client:load />
+        <CheckoutForm client:load />
     </div>
 </ClientLayout>

@@ -6,7 +6,7 @@ import { getSession } from "auth-astro/server";
 import CartAuthManager from '@components/cart/CartAuthManager'
 
 
-// Obtener sesión para el carrito
+// Get session for cart
 const session = await getSession(Astro.request);
 const userWithRole = session?.user as any;
 ---

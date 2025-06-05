@@ -7,8 +7,8 @@ import { getSession } from "auth-astro/server";
 
 export const prerender = false;
 
-// Solo obtener la sesión para mostrar info del usuario
-// NO hay verificaciones ni redirecciones aquí
+// Only get the session to display user info
+// NO verifications or redirects here
 const session = await getSession(Astro.request);
 const { title } = Astro.props;
 const currentPath = Astro.url.pathname;

@@ -105,7 +105,7 @@ export default defineConfig({
             return baseUrl;
         },
     },
-    debug: true, // Habilitar debug en desarrollo
+    debug: true, // Enable debug in development
     logger: {
         error(code, metadata) {
             console.error("🔐 Auth.js Error:", code, metadata);
