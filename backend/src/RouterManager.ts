@@ -64,7 +64,7 @@ export class RouterManager {
                     })),
                 });
             } catch (error) {
-                return ctx.json({ success: false, error: {error} }, 500);
+                return ctx.json({ success: false, error: { error } }, 500);
             }
         });
 
@@ -93,7 +93,7 @@ export class RouterManager {
                         : null,
                 });
             } catch (error) {
-                return ctx.json({ success: false, error: {error} }, 500);
+                return ctx.json({ success: false, error: { error } }, 500);
             }
         });
 
@@ -117,6 +117,20 @@ export class RouterManager {
             this.authController.login(ctx)
         );
         this.app.get("/api/auth/me", (ctx) => this.authController.me(ctx));
+
+        // Rutas de gestión de perfil (REQUIEREN AUTH)
+        this.app.put("/api/auth/profile", (ctx) =>
+            this.authController.updateProfile(ctx)
+        );
+        this.app.put("/api/auth/change-password", (ctx) =>
+            this.authController.changePassword(ctx)
+        );
+        this.app.delete("/api/auth/account", (ctx) =>
+            this.authController.deleteAccount(ctx)
+        );
+        this.app.get("/api/auth/account-type", (ctx) =>
+            this.authController.getAccountType(ctx)
+        );
 
         // Rutas de productos
         this.app.get("/api/products", (ctx) =>

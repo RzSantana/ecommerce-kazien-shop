@@ -2,6 +2,7 @@
 import ClientLayout from "@layouts/ClientLayout.astro";
 import { getSession } from "auth-astro/server";
 import Button from "@components/ui/Button";
+import ProfileManager from "@components/profile/ProfileManager";
 
 export const prerender = false;
 
@@ -17,151 +18,110 @@ const user = session.user;
 // Type assertion para acceder al role
 const userWithRole = user as any;
 const isAdmin = userWithRole.role === "admin";
+
+// Crear objeto de perfil compatible con el componente
+const profileData = {
+    id: userWithRole.id,
+    name: user.name || "No name provided",
+    email: user.email || "No email provided",
+    role: userWithRole.role || "user",
+    createdAt: new Date().toISOString(), // En una app real esto vendría de la BD
+    updatedAt: new Date().toISOString()
+};
 ---
 
 <ClientLayout>
-    <div class="pt-32 px-4 max-w-4xl mx-auto">
+    <div class="pt-32 px-4 max-w-6xl mx-auto">
         <!-- Navegación de vuelta -->
         <div class="mb-8 w-fit">
             <Button text="← Back to Home" type="link" href="/" />
         </div>
 
-        <!-- Contenido del perfil -->
-        <div class="bg-white rounded-lg shadow-md p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                    User Profile
-                </h1>
-                <p class="text-gray-600">
-                    Manage your account information
-                </p>
-
-                <!-- Badge de Admin si aplica -->
-                {isAdmin && (
-                    <div class="mt-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Administrator
-                        </span>
+        <!-- Header de perfil -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                {user.image ? (
+                    <img
+                        src={user.image}
+                        alt="Profile picture"
+                        class="w-24 h-24 rounded-full border-4 border-gray-200"
+                    />
+                ) : (
+                    <div class="w-24 h-24 rounded-full bg-gray-300 border-4 border-gray-200 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
                     </div>
                 )}
             </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                Profile Management
+            </h1>
+            <p class="text-gray-600">
+                Manage your account information and preferences
+            </p>
 
-            <!-- Información del usuario -->
-            <div class="space-y-6">
-                {user.image && (
-                    <div class="flex justify-center">
-                        <img
-                            src={user.image}
-                            alt="Profile picture"
-                            class="w-24 h-24 rounded-full border-4 border-gray-200"
-                        />
+            <!-- Badge de Admin si aplica -->
+            {isAdmin && (
+                <div class="mt-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Administrator
+                    </span>
+                </div>
+            )}
+        </div>
+
+        <!-- Componente de gestión de perfil -->
+        <ProfileManager
+            initialProfile={profileData}
+            currentUserId={userWithRole.id}
+            client:load
+        />
+
+        <!-- Acciones rápidas -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a
+                    href="/orders"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
+                >
+                    <div class="text-sm font-medium text-gray-900 mb-1">
+                        View Orders
                     </div>
+                    <div class="text-xs text-gray-500">
+                        Track your purchases
+                    </div>
+                </a>
+
+                <a
+                    href="/shop"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
+                >
+                    <div class="text-sm font-medium text-gray-900 mb-1">
+                        Continue Shopping
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Browse our products
+                    </div>
+                </a>
+
+                {isAdmin && (
+                    <a
+                        href="/admin"
+                        class="block p-4 border border-blue-300 rounded-md hover:bg-blue-50 text-center transition-colors bg-blue-50"
+                    >
+                        <div class="text-sm font-medium text-blue-900 mb-1">
+                            Admin Panel
+                        </div>
+                        <div class="text-xs text-blue-600">
+                            Manage the store
+                        </div>
+                    </a>
                 )}
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Full Name
-                        </label>
-                        <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
-                            {user.name || "Not provided"}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Email Address
-                        </label>
-                        <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
-                            {user.email || "Not provided"}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección de información adicional -->
-                <div class="border-t pt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        Account Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Account Type
-                            </label>
-                            <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
-                                {isAdmin ? "Administrator" : "Standard User"}
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Member Since
-                            </label>
-                            <div class="bg-gray-50 border border-gray-300 rounded-md px-4 py-3">
-                                {new Date().toLocaleDateString()}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Acciones del perfil -->
-                <div class="border-t pt-6">
-                    {isAdmin ? (
-                        // Layout para administradores
-                        <div class="space-y-4">
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-blue-900">Administrator Access</h4>
-                                        <p class="text-sm text-blue-700">Manage products, users, and store settings</p>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <Button
-                                        text="Access Admin Panel"
-                                        type="primary"
-                                        href="/admin"
-                                    />
-                                </div>
-                            </div>
-
-                            {/*  Botones normales para admin */}
-                            <div class="flex gap-4 justify-center">
-                                <Button
-                                    text="Continue Shopping"
-                                    type="outline"
-                                    href="/shop"
-                                />
-                                <Button
-                                    text="View Orders"
-                                    type="outline"
-                                    href="/orders"
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        // Layout para usuarios normales
-                        <div class="flex gap-4 justify-center">
-                            <Button
-                                text="Continue Shopping"
-                                type="primary"
-                                href="/shop"
-                            />
-                            <Button
-                                text="View Orders"
-                                type="outline"
-                                href="/orders"
-                            />
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     </div>

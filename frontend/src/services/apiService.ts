@@ -56,12 +56,19 @@ class ApiService {
     }
 
     // GET request
-    async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+    async get<T>(
+        endpoint: string,
+        options?: RequestOptions
+    ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { method: "GET", ...options });
     }
 
     // POST request
-    async post<T>(endpoint: string, data: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+    async post<T>(
+        endpoint: string,
+        data: any,
+        options?: RequestOptions
+    ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: "POST",
             body: JSON.stringify(data),
@@ -70,7 +77,11 @@ class ApiService {
     }
 
     // PUT request
-    async put<T>(endpoint: string, data: any, options?: RequestOptions): Promise<ApiResponse<T>> {
+    async put<T>(
+        endpoint: string,
+        data: any,
+        options?: RequestOptions
+    ): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: "PUT",
             body: JSON.stringify(data),
@@ -79,8 +90,16 @@ class ApiService {
     }
 
     // DELETE request
-    async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
-        return this.request<T>(endpoint, { method: "DELETE", ...options });
+    async delete<T>(
+        endpoint: string,
+        options?: RequestOptions & { body?: string }
+    ): Promise<ApiResponse<T>> {
+        const { body, ...requestOptions } = options || {};
+        return this.request<T>(endpoint, {
+            method: "DELETE",
+            ...(body && { body }),
+            ...requestOptions,
+        });
     }
 
     // Health check

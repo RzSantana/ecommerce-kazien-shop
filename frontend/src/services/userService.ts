@@ -1,5 +1,5 @@
 import type { User } from "@auth/core/types";
-import { apiService } from "./api";
+import { apiService } from "./apiService";
 import type { DashboardStats } from "src/types/dashboard";
 
 

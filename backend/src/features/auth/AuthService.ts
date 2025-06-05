@@ -1,6 +1,6 @@
 import { DatabaseManager } from "../../database/DatabaseManager";
 import { User } from "../../generated/prisma";
-import { LoginData, RegisterData } from "./interfaces";
+import { LoginData, RegisterData, UpdateProfileData, ChangePasswordData } from "./interfaces";
 
 export class AuthService {
     private db = DatabaseManager.getInstance().getClient();
@@ -63,13 +63,6 @@ export class AuthService {
             }
 
             console.log("🔍 AuthService: User found, verifying password...");
-            console.log("🔍 AuthService: Stored hash:", user.password);
-            console.log("🔍 AuthService: Input password:", data.password);
-
-            // Hash the input password and compare
-            const inputHash = this.hashPassword(data.password);
-            console.log("🔍 AuthService: Input hash:", inputHash);
-            console.log("🔍 AuthService: Hashes match:", inputHash === user.password);
 
             if (!this.verifyPassword(data.password, user.password)) {
                 console.error("❌ AuthService: Password verification failed for:", data.email);
@@ -112,7 +105,142 @@ export class AuthService {
         }
     }
 
-    // Método para verificar credenciales específicas (para testing)
+    // ===== NUEVOS MÉTODOS PARA GESTIÓN DE PERFILES =====
+
+    public async updateProfile(userId: string, data: UpdateProfileData): Promise<User | null> {
+        try {
+            console.log("📝 AuthService: Updating profile for user:", userId);
+
+            // Verificar que el usuario existe
+            const existingUser = await this.db.user.findUnique({
+                where: { id: userId }
+            });
+
+            if (!existingUser) {
+                console.error("❌ AuthService: User not found for profile update:", userId);
+                throw new Error("User not found");
+            }
+
+            // Si se está cambiando el email, verificar que no esté en uso
+            if (data.email && data.email !== existingUser.email) {
+                const emailInUse = await this.db.user.findUnique({
+                    where: { email: data.email }
+                });
+
+                if (emailInUse) {
+                    console.error("❌ AuthService: Email already in use:", data.email);
+                    throw new Error("Email already in use");
+                }
+            }
+
+            // Actualizar perfil
+            const updatedUser = await this.db.user.update({
+                where: { id: userId },
+                data: {
+                    ...(data.name && { name: data.name }),
+                    ...(data.email && { email: data.email }),
+                    updatedAt: new Date()
+                }
+            });
+
+            console.log("✅ AuthService: Profile updated successfully for:", userId);
+            return updatedUser;
+        } catch (error) {
+            console.error("💥 AuthService UpdateProfile Error:", error);
+            throw error;
+        }
+    }
+
+    public async changePassword(userId: string, data: ChangePasswordData): Promise<boolean> {
+        try {
+            console.log("🔐 AuthService: Changing password for user:", userId);
+
+            // Obtener usuario con password
+            const user = await this.db.user.findUnique({
+                where: { id: userId }
+            });
+
+            if (!user) {
+                console.error("❌ AuthService: User not found for password change:", userId);
+                throw new Error("User not found");
+            }
+
+            // Verificar contraseña actual
+            if (!this.verifyPassword(data.currentPassword, user.password)) {
+                console.error("❌ AuthService: Current password verification failed for:", userId);
+                throw new Error("Current password is incorrect");
+            }
+
+            // Hashear nueva contraseña
+            const newHashedPassword = this.hashPassword(data.newPassword);
+
+            // Actualizar contraseña
+            await this.db.user.update({
+                where: { id: userId },
+                data: {
+                    password: newHashedPassword,
+                    updatedAt: new Date()
+                }
+            });
+
+            console.log("✅ AuthService: Password changed successfully for:", userId);
+            return true;
+        } catch (error) {
+            console.error("💥 AuthService ChangePassword Error:", error);
+            throw error;
+        }
+    }
+
+    public async deleteAccount(userId: string, password: string): Promise<boolean> {
+        try {
+            console.log("🗑️ AuthService: Deleting account for user:", userId);
+
+            // Obtener usuario con password
+            const user = await this.db.user.findUnique({
+                where: { id: userId }
+            });
+
+            if (!user) {
+                console.error("❌ AuthService: User not found for account deletion:", userId);
+                throw new Error("User not found");
+            }
+
+            // Verificar contraseña para seguridad
+            if (!this.verifyPassword(password, user.password)) {
+                console.error("❌ AuthService: Password verification failed for account deletion:", userId);
+                throw new Error("Password is incorrect");
+            }
+
+            // Eliminar cuenta
+            await this.db.user.delete({
+                where: { id: userId }
+            });
+
+            console.log("✅ AuthService: Account deleted successfully for:", userId);
+            return true;
+        } catch (error) {
+            console.error("💥 AuthService DeleteAccount Error:", error);
+            throw error;
+        }
+    }
+
+    // Método para verificar si una cuenta es local (tiene password) o de OAuth
+    public async isLocalAccount(userId: string): Promise<boolean> {
+        try {
+            const user = await this.db.user.findUnique({
+                where: { id: userId },
+                select: { password: true }
+            });
+
+            // Si tiene password, es cuenta local
+            return user ? user.password.length > 0 : false;
+        } catch (error) {
+            console.error("💥 AuthService IsLocalAccount Error:", error);
+            return false;
+        }
+    }
+
+    // Métodos existentes que mantienen compatibilidad...
     public async testCredentials(email: string, password: string): Promise<boolean> {
         try {
             console.log("🧪 AuthService: Testing credentials for:", email);
@@ -124,7 +252,6 @@ export class AuthService {
         }
     }
 
-    // Método para listar usuarios (para debugging)
     public async getAllUsers(): Promise<any[]> {
         try {
             const users = await this.db.user.findMany({

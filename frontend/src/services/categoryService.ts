@@ -1,5 +1,5 @@
 import type { Category, CreateCategoryData } from "src/types/category";
-import { apiService } from "./api";
+import { apiService } from "./apiService";
 
 class CategoryService {
     private readonly ENDPOINT = "/api/categories";

@@ -1,5 +1,5 @@
 import type { CreateProductData, Product } from "src/types/product";
-import { apiService } from "./api";
+import { apiService } from "./apiService";
 import { API_CONFIG } from "src/config/api";
 
 class ProductService {

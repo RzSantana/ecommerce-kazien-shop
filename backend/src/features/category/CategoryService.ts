@@ -1,171 +1,75 @@
-import type { Category, CreateCategoryData } from "src/types/category";
-import { API_CONFIG } from "src/config/api";
+import { DatabaseManager } from "../../database/DatabaseManager";
+import { Category } from "../../generated/prisma";
+import { CreateCategoryData, UpdateCategoryData } from "./interfaces";
 
-class CategoryService {
-    private readonly BASE_URL = API_CONFIG.BASE_URL;
-    private readonly ENDPOINT = "/api/categories";
+export class CategoryService {
+    private db = DatabaseManager.getInstance().getClient();
 
-    // Realizar petición con manejo de errores
-    private async makeRequest<T>(
-        url: string,
-        options: RequestInit = {}
-    ): Promise<T | null> {
-        try {
-            const defaultHeaders = {
-                "Content-Type": "application/json",
-            };
-
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    ...defaultHeaders,
-                    ...options.headers,
-                },
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(
-                    errorData.error ||
-                        `HTTP ${response.status}: ${response.statusText}`
-                );
+    public async createCategory(data: CreateCategoryData): Promise<Category> {
+        return await this.db.category.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                isActive: data.isActive ?? true
             }
-
-            const data = await response.json();
-
-            if (data.success === false) {
-                throw new Error(data.error || "Request failed");
-            }
-
-            return data.success ? data.data : data;
-        } catch (error) {
-            console.error(`API Request failed for ${url}:`, error);
-            throw error;
-        }
+        });
     }
 
-    async getAllCategories(): Promise<Category[]> {
-        try {
-            console.log("🔍 Fetching all categories...");
-            const data = await this.makeRequest<Category[]>(
-                `${this.BASE_URL}${this.ENDPOINT}`
-            );
-            console.log(`✅ Loaded ${data?.length || 0} categories`);
-            return data || [];
-        } catch (error) {
-            console.error("❌ Error getting all categories:", error);
-            return [];
-        }
-    }
-
-    async getActiveCategories(): Promise<Category[]> {
-        try {
-            console.log("🔍 Fetching active categories...");
-            const data = await this.makeRequest<Category[]>(
-                `${this.BASE_URL}${this.ENDPOINT}/active`
-            );
-            console.log(`✅ Loaded ${data?.length || 0} active categories`);
-            return data || [];
-        } catch (error) {
-            console.error("❌ Error getting active categories:", error);
-            return [];
-        }
-    }
-
-    async createCategory(
-        data: CreateCategoryData,
-        userId?: string
-    ): Promise<Category | null> {
-        try {
-            console.log("✅ Creating category with data:", data);
-
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
-            }
-
-            const category = await this.makeRequest<Category>(
-                `${this.BASE_URL}${this.ENDPOINT}`,
-                {
-                    method: "POST",
-                    headers,
-                    body: JSON.stringify(data),
+    public async getAllCategories(): Promise<Category[]> {
+        return await this.db.category.findMany({
+            include: {
+                _count: {
+                    select: { products: true }
                 }
-            );
-
-            console.log("✅ Category created successfully:", category);
-            return category;
-        } catch (error) {
-            console.error("❌ Error creating category:", error);
-            throw error;
-        }
+            },
+            orderBy: { name: 'asc' }
+        });
     }
 
-    async updateCategory(
-        id: string,
-        data: Partial<CreateCategoryData>,
-        userId?: string
-    ): Promise<Category | null> {
-        try {
-            console.log(`✅ Updating category ${id} with data:`, data);
-
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
-            }
-
-            const category = await this.makeRequest<Category>(
-                `${this.BASE_URL}${this.ENDPOINT}/${id}`,
-                {
-                    method: "PUT",
-                    headers,
-                    body: JSON.stringify(data),
+    public async getActiveCategories(): Promise<Category[]> {
+        return await this.db.category.findMany({
+            where: { isActive: true },
+            include: {
+                _count: {
+                    select: { products: true }
                 }
-            );
-
-            console.log("✅ Category updated successfully:", category);
-            return category;
-        } catch (error) {
-            console.error(`❌ Error updating category ${id}:`, error);
-            throw error;
-        }
+            },
+            orderBy: { name: 'asc' }
+        });
     }
 
-    async deleteCategory(id: string, userId?: string): Promise<boolean> {
-        try {
-            console.log(`🗑️ Deleting category ${id}`);
-
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
+    public async getCategoryById(id: string): Promise<Category | null> {
+        return await this.db.category.findUnique({
+            where: { id },
+            include: {
+                products: true,
+                _count: {
+                    select: { products: true }
+                }
             }
-
-            await this.makeRequest(`${this.BASE_URL}${this.ENDPOINT}/${id}`, {
-                method: "DELETE",
-                headers,
-            });
-
-            console.log("✅ Category deleted successfully");
-            return true;
-        } catch (error) {
-            console.error(`❌ Error deleting category ${id}:`, error);
-            return false;
-        }
+        });
     }
 
-    async getCategoryById(id: string): Promise<Category | null> {
-        try {
-            console.log(`🔍 Fetching category ${id}...`);
-            const category = await this.makeRequest<Category>(
-                `${this.BASE_URL}${this.ENDPOINT}/${id}`
-            );
-            console.log("✅ Category loaded:", category);
-            return category;
-        } catch (error) {
-            console.error(`❌ Error getting category ${id}:`, error);
-            return null;
+    public async updateCategory(id: string, data: UpdateCategoryData): Promise<Category> {
+        return await this.db.category.update({
+            where: { id },
+            data
+        });
+    }
+
+    public async deleteCategory(id: string): Promise<void> {
+        // Verificar que no tenga productos asociados
+        const categoryWithProducts = await this.db.category.findUnique({
+            where: { id },
+            include: { _count: { select: { products: true } } }
+        });
+
+        if (categoryWithProducts && categoryWithProducts._count.products > 0) {
+            throw new Error("Cannot delete category with associated products");
         }
+
+        await this.db.category.delete({
+            where: { id }
+        });
     }
 }
-
-export const categoryService = new CategoryService();

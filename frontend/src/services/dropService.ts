@@ -1,6 +1,6 @@
 import { API_CONFIG } from "src/config/api";
 import type { CreateDropData, Drop, DropProduct } from "src/types/drop";
-import { apiService } from "./api";
+import { apiService } from "./apiService";
 
 class DropService {
     // Obtener todos los drops (público)
