@@ -7,25 +7,30 @@ export class AuthController {
     // POST /api/auth/register
     public async register(c: Context) {
         try {
+            console.log("🔐 AuthController: Register attempt");
             const { email, password, name } = await c.req.json();
 
             if (!email || !password || !name) {
+                console.log("❌ AuthController: Missing required fields");
                 return c.json({
                     success: false,
                     error: 'Email, password and name are required'
                 }, 400);
             }
 
+            console.log("🔐 AuthController: Registering user:", email);
             const user = await this.authService.register({ email, password, name });
 
             // No devolver la password
             const { password: _, ...userWithoutPassword } = user;
 
+            console.log("✅ AuthController: User registered successfully:", user.id);
             return c.json({
                 success: true,
                 data: userWithoutPassword
             }, 201);
         } catch (error) {
+            console.error("❌ AuthController: Registration error:", error);
             const errorMessage = error instanceof Error ? error.message : "Registration failed";
             return c.json({
                 success: false,
@@ -37,18 +42,24 @@ export class AuthController {
     // POST /api/auth/login
     public async login(c: Context) {
         try {
+            console.log("🔐 AuthController: Login attempt");
             const { email, password } = await c.req.json();
 
+            console.log("🔐 AuthController: Login data received:", { email, password: "***" });
+
             if (!email || !password) {
+                console.log("❌ AuthController: Missing email or password");
                 return c.json({
                     success: false,
                     error: 'Email and password are required'
                 }, 400);
             }
 
+            console.log("🔐 AuthController: Attempting login for:", email);
             const user = await this.authService.login({ email, password });
 
             if (!user) {
+                console.log("❌ AuthController: Invalid credentials for:", email);
                 return c.json({
                     success: false,
                     error: 'Invalid credentials'
@@ -58,11 +69,13 @@ export class AuthController {
             // No devolver la password
             const { password: _, ...userWithoutPassword } = user;
 
+            console.log("✅ AuthController: Login successful for user:", user.id, "Role:", user.role);
             return c.json({
                 success: true,
                 data: userWithoutPassword
             });
         } catch (error) {
+            console.error("❌ AuthController: Login error:", error);
             const errorMessage = error instanceof Error ? error.message : "Login failed";
             return c.json({
                 success: false,

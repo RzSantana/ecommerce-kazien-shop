@@ -56,8 +56,18 @@ try {
         )
     }
 
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900">
+            Welcome back, {session?.user?.name || "Admin"}!
+        </h2>
+        <p class="text-gray-600">
+            Here's what's happening with your martial arts shop today.
+        </p>
+    </div>
+
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Users Card -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -135,7 +145,45 @@ try {
             </div>
         </div>
 
-        <!-- Drops Card -->
+        <!-- Categories Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div
+                        class="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                            ></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            Categories
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {stats?.categories?.total || 8}
+                        </dd>
+                        <dd class="text-sm text-green-600">
+                            {stats?.categories?.active || 8} active
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collections Card -->
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -178,14 +226,26 @@ try {
     <div class="bg-white rounded-lg shadow">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+            <p class="text-sm text-gray-600">Common management tasks</p>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <a
-                    href="/admin/products"
-                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                    href="/admin/users"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
                 >
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="text-sm font-medium text-gray-900 mb-1">
+                        Manage Users
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        View and manage accounts
+                    </div>
+                </a>
+                <a
+                    href="/admin/products"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
+                >
+                    <div class="text-sm font-medium text-gray-900 mb-1">
                         Manage Products
                     </div>
                     <div class="text-xs text-gray-500">
@@ -194,38 +254,55 @@ try {
                 </a>
 
                 <a
-                    href="/admin/users"
-                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                    href="/admin/categories"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
                 >
-                    <div class="text-sm font-medium text-gray-900">
-                        Manage Users
+                    <div class="text-sm font-medium text-gray-900 mb-1">
+                        Manage Categories
                     </div>
                     <div class="text-xs text-gray-500">
-                        View and manage user accounts
+                        Organize product categories
                     </div>
                 </a>
 
                 <a
                     href="/admin/drops"
-                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
+                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
                 >
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="text-sm font-medium text-gray-900 mb-1">
                         Manage Collections
                     </div>
                     <div class="text-xs text-gray-500">
                         Create and manage drops
                     </div>
                 </a>
+            </div>
+        </div>
+    </div>
 
-                <a
-                    href="/"
-                    class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center"
-                >
-                    <div class="text-sm font-medium text-gray-900">
-                        View Site
-                    </div>
-                    <div class="text-xs text-gray-500">Go to customer view</div>
-                </a>
+    <!-- Recent Activity (placeholder) -->
+    <div class="mt-8 bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+        </div>
+        <div class="p-6">
+            <div class="text-center py-8">
+                <div class="text-gray-500 mb-4">
+                    <svg
+                        class="w-12 h-12 mx-auto"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        ></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500">Activity tracking coming soon...</p>
             </div>
         </div>
     </div>

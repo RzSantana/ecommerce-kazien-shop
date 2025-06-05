@@ -11,6 +11,7 @@ import { AdminController } from "./features/admin/AdminController";
 import { CategoryController } from "./features/category/CategoryController";
 import { DatabaseManager } from "./database/DatabaseManager";
 import { adminMiddleware } from "./utils/middleware/adminMiddleware";
+import { AuthService } from "./features/auth/AuthService";
 
 export class RouterManager {
     private app: Hono;
@@ -20,6 +21,7 @@ export class RouterManager {
     private adminController = new AdminController();
     private categoryController = new CategoryController();
     private dbManager = DatabaseManager.getInstance();
+    private authService = new AuthService();
 
     public constructor(app: Hono) {
         this.app = app;
@@ -45,6 +47,55 @@ export class RouterManager {
         this.app.get("/health", (ctx) =>
             ctx.json({ status: "ok", timestamp: new Date() })
         );
+
+        // DEBUG ENDPOINT - Para verificar usuarios y autenticación
+        this.app.get("/debug/users", async (ctx) => {
+            try {
+                const users = await this.authService.getAllUsers();
+                return ctx.json({
+                    success: true,
+                    users: users.map((u) => ({
+                        id: u.id,
+                        email: u.email,
+                        name: u.name,
+                        role: u.role,
+                        hasPassword: !!u.password,
+                        passwordHash: u.password,
+                    })),
+                });
+            } catch (error) {
+                return ctx.json({ success: false, error: {error} }, 500);
+            }
+        });
+
+        // DEBUG ENDPOINT - Para probar credenciales específicas
+        this.app.post("/debug/test-login", async (ctx) => {
+            try {
+                const { email, password } = await ctx.req.json();
+                console.log("🧪 Testing login for:", email);
+
+                const result = await this.authService.testCredentials(
+                    email,
+                    password
+                );
+                const user = await this.authService.login({ email, password });
+
+                return ctx.json({
+                    success: true,
+                    credentialsValid: result,
+                    user: user
+                        ? {
+                              id: user.id,
+                              email: user.email,
+                              name: user.name,
+                              role: user.role,
+                          }
+                        : null,
+                });
+            } catch (error) {
+                return ctx.json({ success: false, error: {error} }, 500);
+            }
+        });
 
         // TEST ENDPOINT para verificar JSON
         this.app.post("/test-json", async (ctx) => {
@@ -166,6 +217,11 @@ export class RouterManager {
 
         console.log("✅ RouterManager configured successfully");
         console.log("🔒 Admin routes protected with adminMiddleware");
+        console.log("📦 Product routes configured");
+        console.log("📂 Category routes configured");
+        console.log("🧪 Debug routes enabled:");
+        console.log("   GET  /debug/users - List all users");
+        console.log("   POST /debug/test-login - Test credentials");
     }
 
     public async shutdown() {

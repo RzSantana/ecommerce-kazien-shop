@@ -2,6 +2,7 @@
 import AdminCategoriesManager from "@components/admin/AdminCategoryManager";
 import AdminLayout from "@layouts/AdminLayout.astro";
 import { getSession } from "auth-astro/server";
+import { categoryService } from "src/services/categoryService";
 import type { Category } from "src/types/category";
 
 export const prerender = false;
@@ -10,33 +11,102 @@ export const prerender = false;
 const session = await getSession(Astro.request);
 const userWithRole = session?.user as any;
 
-// Obtener categorías
+// Obtener categorías reales del backend
 let categories: Category[] = [];
 let error = null;
 
 try {
-    // Simular categorías por ahora hasta implementar el backend completo
-    categories = [
-        { id: "1", name: "Electronics", description: "Electronic devices and gadgets", isActive: true, _count: { products: 5 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
-        { id: "2", name: "Clothing", description: "Apparel and fashion items", isActive: true, _count: { products: 12 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
-        { id: "3", name: "Sports", description: "Sports equipment and gear", isActive: true, _count: { products: 8 }, createdAt: new Date().toString(), updatedAt: new Date().toString() },
-        { id: "4", name: "Accessories", description: "Various accessories", isActive: false, _count: { products: 0 }, createdAt: new Date().toString(), updatedAt: new Date().toString() }
-    ];
+    categories = await categoryService.getAllCategories();
+    console.log(`✅ Loaded ${categories.length} categories from backend`);
 } catch (e) {
-    error = 'Error loading categories';
-    console.error('Categories error:', e);
+    error = "Error loading categories from backend";
+    console.error("Categories error:", e);
+
+    // Fallback a datos de ejemplo si falla el backend
+    categories = [
+        {
+            id: "fallback-1",
+            name: "Boxing Gloves",
+            description:
+                "Professional boxing gloves for training and competition",
+            isActive: true,
+            _count: { products: 5 },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        },
+        {
+            id: "fallback-2",
+            name: "MMA Gloves",
+            description: "Mixed martial arts gloves for grappling and striking",
+            isActive: true,
+            _count: { products: 3 },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        },
+        {
+            id: "fallback-3",
+            name: "Inactive Category",
+            description: "This category is inactive",
+            isActive: false,
+            _count: { products: 0 },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        },
+    ];
 }
 ---
 
 <AdminLayout title="Categories Management">
-    {error && (
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            {error}
-        </div>
-    )}
+    {
+        error && (
+            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+                <div class="flex">
+                    <div class="py-1">
+                        <svg
+                            class="fill-current h-6 w-6 text-yellow-500 mr-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                        >
+                            <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-bold">Backend Connection Issue</p>
+                        <p class="text-sm">
+                            {error} - Using fallback data. Check that backend is
+                            running.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     <AdminCategoriesManager
         categories={categories}
+        currentUserId={userWithRole?.id}
         client:load
     />
+
+    <!-- Debug Info (remove in production) -->
+    {
+        import.meta.env.DEV && (
+            <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
+                <>
+                    <strong>Debug Info:</strong>
+                    <br />
+                </>
+                User ID: {userWithRole?.id || "No user ID"}
+                <br />
+                User Role: {userWithRole?.role || "No role"}
+                <br />
+                Categories loaded: {categories.length}
+                <br />
+                Backend API:{" "}
+                {import.meta.env.PUBLIC_API_URL || "http://localhost:3000"}
+                <br />
+                Error: {error || "None"}
+            </div>
+        )
+    }
 </AdminLayout>

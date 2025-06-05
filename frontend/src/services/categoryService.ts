@@ -11,16 +11,12 @@ class CategoryService {
         options: RequestInit = {}
     ): Promise<T | null> {
         try {
-            const defaultHeaders = {
-                "Content-Type": "application/json",
-            };
-
             const response = await fetch(url, {
-                ...options,
                 headers: {
-                    ...defaultHeaders,
+                    "Content-Type": "application/json",
                     ...options.headers,
                 },
+                ...options,
             });
 
             if (!response.ok) {
@@ -72,23 +68,14 @@ class CategoryService {
         }
     }
 
-    async createCategory(
-        data: CreateCategoryData,
-        userId?: string
-    ): Promise<Category | null> {
+    async createCategory(data: CreateCategoryData): Promise<Category | null> {
         try {
             console.log("✅ Creating category with data:", data);
-
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
-            }
 
             const category = await this.makeRequest<Category>(
                 `${this.BASE_URL}${this.ENDPOINT}`,
                 {
                     method: "POST",
-                    headers,
                     body: JSON.stringify(data),
                 }
             );
@@ -103,22 +90,15 @@ class CategoryService {
 
     async updateCategory(
         id: string,
-        data: Partial<CreateCategoryData>,
-        userId?: string
+        data: Partial<CreateCategoryData>
     ): Promise<Category | null> {
         try {
             console.log(`✅ Updating category ${id} with data:`, data);
-
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
-            }
 
             const category = await this.makeRequest<Category>(
                 `${this.BASE_URL}${this.ENDPOINT}/${id}`,
                 {
                     method: "PUT",
-                    headers,
                     body: JSON.stringify(data),
                 }
             );
@@ -131,18 +111,12 @@ class CategoryService {
         }
     }
 
-    async deleteCategory(id: string, userId?: string): Promise<boolean> {
+    async deleteCategory(id: string): Promise<boolean> {
         try {
             console.log(`🗑️ Deleting category ${id}`);
 
-            const headers: any = {};
-            if (userId) {
-                headers["X-User-ID"] = userId;
-            }
-
             await this.makeRequest(`${this.BASE_URL}${this.ENDPOINT}/${id}`, {
                 method: "DELETE",
-                headers,
             });
 
             console.log("✅ Category deleted successfully");

@@ -16,21 +16,45 @@ export default defineConfig({
             },
             async authorize(credentials) {
                 try {
+                    console.log("🔐 Auth.js: Attempting login with credentials");
+                    console.log("🔐 Auth.js: Email:", credentials?.email);
+
+                    if (!credentials?.email || !credentials?.password) {
+                        console.log("❌ Auth.js: Missing email or password");
+                        return null;
+                    }
+
                     // Llamar a tu API backend
-                    const response = await fetch('http://localhost:3000/api/auth/login', {
+                    const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+                    const loginUrl = `${apiUrl}/api/auth/login`;
+
+                    console.log("🔐 Auth.js: Calling backend:", loginUrl);
+
+                    const response = await fetch(loginUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            email: credentials?.email,
-                            password: credentials?.password
+                            email: credentials.email,
+                            password: credentials.password
                         })
                     });
 
-                    const result = await response.json();
+                    console.log("🔐 Auth.js: Backend response status:", response.status);
 
-                    if (response.ok && result.success && result.data) {
+                    if (!response.ok) {
+                        console.log("❌ Auth.js: Backend response not ok:", response.statusText);
+                        const errorText = await response.text();
+                        console.log("❌ Auth.js: Error response body:", errorText);
+                        return null;
+                    }
+
+                    const result = await response.json();
+                    console.log("🔐 Auth.js: Backend response:", result);
+
+                    if (result.success && result.data) {
+                        console.log("✅ Auth.js: Login successful for:", result.data.email);
                         // Login exitoso, retornar usuario
                         return {
                             id: result.data.id,
@@ -40,10 +64,10 @@ export default defineConfig({
                         };
                     }
 
-                    // Login falló
+                    console.log("❌ Auth.js: Login failed - invalid response");
                     return null;
                 } catch (error) {
-                    console.error("Auth error:", error);
+                    console.error("❌ Auth.js: Exception during login:", error);
                     return null;
                 }
             }
@@ -57,17 +81,22 @@ export default defineConfig({
     callbacks: {
         jwt({ token, user }) {
             if (user) {
+                console.log("🔐 Auth.js: JWT callback - user:", user);
                 token.role = user.role || "user";
+                token.id = user.id;
             }
             return token;
         },
         session({ session, token }) {
-            if (session.user) {
+            if (session.user && token) {
+                console.log("🔐 Auth.js: Session callback - token:", token);
                 session.user.role = token.role;
+                session.user.id = token.id;
             }
             return session;
         },
         redirect({ url, baseUrl }) {
+            console.log("🔐 Auth.js: Redirect callback - url:", url, "baseUrl:", baseUrl);
             // Redirigir a home después del login exitoso
             if (url.startsWith(baseUrl)) {
                 return url;
@@ -75,5 +104,17 @@ export default defineConfig({
             // Si viene de un login exitoso, ir al home
             return baseUrl;
         },
+    },
+    debug: true, // Habilitar debug en desarrollo
+    logger: {
+        error(code, metadata) {
+            console.error("🔐 Auth.js Error:", code, metadata);
+        },
+        warn(code) {
+            console.warn("🔐 Auth.js Warning:", code);
+        },
+        debug(code, metadata) {
+            console.log("🔐 Auth.js Debug:", code, metadata);
+        }
     }
 })

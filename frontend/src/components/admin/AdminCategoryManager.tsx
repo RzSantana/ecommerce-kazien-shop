@@ -5,34 +5,70 @@ import { categoryService } from "src/services/categoryService";
 
 interface AdminCategoriesManagerProps {
     categories: Category[];
+    currentUserId?: string;
 }
 
-export default function AdminCategoriesManager({ categories: initialCategories }: AdminCategoriesManagerProps) {
+export default function AdminCategoriesManager({
+    categories: initialCategories,
+    currentUserId,
+}: AdminCategoriesManagerProps) {
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(
+        null
+    );
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        isActive: true
+        isActive: true,
     });
 
     const handleDeleteCategory = async (categoryId: string) => {
-        if (!confirm("Are you sure you want to delete this category?")) return;
+        const category = categories.find((c) => c.id === categoryId);
+        const productCount = category?._count?.products || 0;
+
+        if (productCount > 0) {
+            showToast(
+                `Cannot delete category "${category?.name}" - it has ${productCount} products assigned`,
+                "error"
+            );
+            return;
+        }
+
+        if (
+            !confirm(
+                `Are you sure you want to delete the category "${category?.name}"?`
+            )
+        )
+            return;
+
+        // Verificar que tengamos el ID del usuario
+        if (!currentUserId) {
+            setError(
+                "User session not found. Please refresh the page and try again."
+            );
+            return;
+        }
 
         setLoading(true);
         try {
-            const success = await categoryService.deleteCategory(categoryId);
+            const success = await categoryService.deleteCategory(
+                categoryId,
+                currentUserId
+            );
             if (success) {
-                setCategories(categories.filter(c => c.id !== categoryId));
+                setCategories(categories.filter((c) => c.id !== categoryId));
                 showToast("Category deleted successfully", "success");
             } else {
                 setError("Failed to delete category");
             }
         } catch (e) {
-            setError("Error deleting category");
+            const errorMessage =
+                e instanceof Error ? e.message : "Error deleting category";
+            setError(errorMessage);
+            showToast(errorMessage, "error");
         } finally {
             setLoading(false);
         }
@@ -44,8 +80,9 @@ export default function AdminCategoriesManager({ categories: initialCategories }
         setFormData({
             name: "",
             description: "",
-            isActive: true
+            isActive: true,
         });
+        setError("");
     };
 
     const handleEditCategory = (category: Category) => {
@@ -53,62 +90,169 @@ export default function AdminCategoriesManager({ categories: initialCategories }
         setFormData({
             name: category.name,
             description: category.description || "",
-            isActive: category.isActive
+            isActive: category.isActive,
         });
         setShowCreateForm(true);
+        setError("");
     };
 
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError("");
 
         try {
+            // Verificar que tengamos el ID del usuario
+            if (!currentUserId) {
+                throw new Error(
+                    "User session not found. Please refresh the page and try again."
+                );
+            }
+
+            // Validaciones
+            if (!formData.name.trim()) {
+                throw new Error("Category name is required");
+            }
+
+            if (formData.name.trim().length < 2) {
+                throw new Error(
+                    "Category name must be at least 2 characters long"
+                );
+            }
+
+            // Verificar nombres duplicados (excluyendo la categoría actual si estamos editando)
+            const duplicateName = categories.find(
+                (c) =>
+                    c.name.toLowerCase() ===
+                        formData.name.trim().toLowerCase() &&
+                    c.id !== editingCategory?.id
+            );
+
+            if (duplicateName) {
+                throw new Error(
+                    `A category with the name "${formData.name.trim()}" already exists`
+                );
+            }
+
+            const categoryData = {
+                name: formData.name.trim(),
+                description: formData.description.trim() || undefined,
+                isActive: formData.isActive,
+            };
+
             if (editingCategory) {
-                const updatedCategory = await categoryService.updateCategory(editingCategory.id, formData);
+                const updatedCategory = await categoryService.updateCategory(
+                    editingCategory.id,
+                    categoryData,
+                    currentUserId
+                );
                 if (updatedCategory) {
-                    setCategories(categories.map(c => c.id === editingCategory.id ? updatedCategory : c));
+                    setCategories(
+                        categories.map((c) =>
+                            c.id === editingCategory.id ? updatedCategory : c
+                        )
+                    );
                     showToast("Category updated successfully", "success");
+                } else {
+                    throw new Error("Failed to update category");
                 }
             } else {
-                const newCategory = await categoryService.createCategory(formData);
+                const newCategory = await categoryService.createCategory(
+                    categoryData,
+                    currentUserId
+                );
                 if (newCategory) {
-                    setCategories([newCategory, ...categories]);
+                    // Agregar el _count para consistencia
+                    const categoryWithCount = {
+                        ...newCategory,
+                        _count: { products: 0 },
+                    };
+                    setCategories([categoryWithCount, ...categories]);
                     showToast("Category created successfully", "success");
+                } else {
+                    throw new Error("Failed to create category");
                 }
             }
 
             setShowCreateForm(false);
-            setError("");
         } catch (e) {
-            setError(`Error ${editingCategory ? 'updating' : 'creating'} category`);
+            const errorMessage =
+                e instanceof Error ? e.message : "Unknown error occurred";
+            setError(errorMessage);
+            showToast(errorMessage, "error");
         } finally {
             setLoading(false);
         }
     };
 
     const showToast = (message: string, type: "success" | "error") => {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 z-50 p-4 rounded-md text-white font-medium ${
-            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        const toast = document.createElement("div");
+        toast.className = `fixed top-4 right-4 z-50 p-4 rounded-md text-white font-medium shadow-lg transition-all duration-300 ${
+            type === "success" ? "bg-green-500" : "bg-red-500"
         }`;
-        toast.textContent = message;
+        toast.innerHTML = `
+            <div class="flex items-center">
+                <span class="mr-2">${type === "success" ? "✓" : "✕"}</span>
+                <span>${message}</span>
+                <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">✕</button>
+            </div>
+        `;
         document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateX(100%)";
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 3000);
+    };
+
+    const getStatusColor = (isActive: boolean) => {
+        return isActive
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800";
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
     };
 
     return (
         <div>
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {error}
+                    <div className="flex">
+                        <div className="py-1">
+                            <svg
+                                className="fill-current h-6 w-6 text-red-500 mr-4"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                            >
+                                <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="font-bold">Error</p>
+                            <p className="text-sm">{error}</p>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                    Categories ({categories.length})
-                </h2>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        Categories ({categories.length})
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Manage product categories for your store
+                    </p>
+                </div>
                 <Button
                     text="Add New Category"
                     type="primary"
@@ -135,6 +279,9 @@ export default function AdminCategoriesManager({ categories: initialCategories }
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Created
+                                </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
@@ -142,48 +289,80 @@ export default function AdminCategoriesManager({ categories: initialCategories }
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {categories.map((category) => (
-                                <tr key={category.id} className="hover:bg-gray-50">
+                                <tr
+                                    key={category.id}
+                                    className="hover:bg-gray-50"
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {category.name}
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            ID: {category.id.slice(0, 8)}...
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {category.name}
+                                            </div>
+                                            <div className="text-sm text-gray-500">
+                                                ID: {category.id.slice(0, 8)}...
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-900 max-w-xs truncate">
-                                            {category.description || "No description"}
+                                        <div className="text-sm text-gray-900 max-w-xs">
+                                            <p className="line-clamp-2">
+                                                {category.description ||
+                                                    "No description provided"}
+                                            </p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">
-                                            {category._count?.products || 0} products
+                                            <span className="font-medium">
+                                                {category._count?.products || 0}
+                                            </span>{" "}
+                                            products
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                            category.isActive
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-                                        }`}>
-                                            {category.isActive ? 'Active' : 'Inactive'}
+                                        <span
+                                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                                                category.isActive
+                                            )}`}
+                                        >
+                                            {category.isActive
+                                                ? "Active"
+                                                : "Inactive"}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {formatDate(category.createdAt)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                         <button
-                                            onClick={() => handleEditCategory(category)}
-                                            className="text-blue-600 hover:text-blue-900"
+                                            onClick={() =>
+                                                handleEditCategory(category)
+                                            }
+                                            className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
                                             disabled={loading}
                                         >
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteCategory(category.id)}
-                                            className="text-red-600 hover:text-red-900"
-                                            disabled={loading || (category._count?.products || 0) > 0}
+                                            onClick={() =>
+                                                handleDeleteCategory(
+                                                    category.id
+                                                )
+                                            }
+                                            className={`hover:text-red-900 disabled:opacity-50 ${
+                                                (category._count?.products ||
+                                                    0) > 0
+                                                    ? "text-gray-400 cursor-not-allowed"
+                                                    : "text-red-600"
+                                            }`}
+                                            disabled={
+                                                loading ||
+                                                (category._count?.products ||
+                                                    0) > 0
+                                            }
                                             title={
-                                                (category._count?.products || 0) > 0
+                                                (category._count?.products ||
+                                                    0) > 0
                                                     ? "Cannot delete category with products"
                                                     : "Delete category"
                                             }
@@ -199,9 +378,34 @@ export default function AdminCategoriesManager({ categories: initialCategories }
 
                 {categories.length === 0 && (
                     <div className="text-center py-12">
-                        <div className="text-gray-500">
-                            No categories found. Create your first category to get started.
+                        <div className="bg-gray-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                            <svg
+                                className="w-12 h-12 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                ></path>
+                            </svg>
                         </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            No categories found
+                        </h3>
+                        <p className="text-gray-500 mb-6">
+                            Create your first category to organize your
+                            products.
+                        </p>
+                        <Button
+                            text="Create Category"
+                            type="primary"
+                            onClick={handleCreateCategory}
+                            disabled={loading}
+                        />
                     </div>
                 )}
             </div>
@@ -212,28 +416,46 @@ export default function AdminCategoriesManager({ categories: initialCategories }
                     <div className="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
                         <form onSubmit={handleSubmitForm} className="mt-3">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                {editingCategory ? "Edit Category" : "Create New Category"}
+                                {editingCategory
+                                    ? "Edit Category"
+                                    : "Create New Category"}
                             </h3>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Name *
+                                    </label>
                                     <input
                                         type="text"
                                         value={formData.name}
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                name: e.target.value,
+                                            })
+                                        }
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Category name"
                                         required
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Description
+                                    </label>
                                     <textarea
                                         value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                description: e.target.value,
+                                            })
+                                        }
                                         rows={3}
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Category description"
                                     />
                                 </div>
 
@@ -242,35 +464,84 @@ export default function AdminCategoriesManager({ categories: initialCategories }
                                         <input
                                             type="checkbox"
                                             checked={formData.isActive}
-                                            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                                            className="mr-2"
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    isActive: e.target.checked,
+                                                })
+                                            }
+                                            className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                         />
-                                        <span className="text-sm text-gray-700">Active</span>
+                                        <span className="text-sm text-gray-700">
+                                            Active
+                                        </span>
                                     </label>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Inactive categories won't be shown to
+                                        customers
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="flex space-x-2 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setShowCreateForm(false)}
-                                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                    onClick={() => {
+                                        setShowCreateForm(false);
+                                        setError("");
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
                                     disabled={loading}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                     disabled={loading}
                                 >
-                                    {loading ? 'Saving...' : (editingCategory ? 'Update' : 'Create')}
+                                    {loading
+                                        ? "Saving..."
+                                        : editingCategory
+                                        ? "Update"
+                                        : "Create"}
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
+            {/* Category Stats */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-sm font-medium text-gray-500">
+                        Total Categories
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                        {categories.length}
+                    </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-sm font-medium text-gray-500">
+                        Active Categories
+                    </div>
+                    <div className="text-2xl font-bold text-green-600">
+                        {categories.filter((c) => c.isActive).length}
+                    </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-sm font-medium text-gray-500">
+                        Total Products
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">
+                        {categories.reduce(
+                            (total, c) => total + (c._count?.products || 0),
+                            0
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
