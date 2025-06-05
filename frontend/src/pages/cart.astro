@@ -1,0 +1,21 @@
+---
+import ClientLayout from "@layouts/ClientLayout.astro";
+import CartManager from "@components/cart/CartManager";
+
+export const prerender = false;
+---
+
+<ClientLayout>
+    <div class="pt-32 px-4 max-w-6xl mx-auto min-h-screen">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                Carrito de Compras
+            </h1>
+            <p class="text-gray-600">
+                Revisa y gestiona los productos de tu carrito
+            </p>
+        </div>
+
+        <CartManager client:load />
+    </div>
+</ClientLayout>

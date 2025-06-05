@@ -1,10 +1,8 @@
 import Button from "@components/ui/Button";
 import Slider from "@components/ui/Slider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Product } from "src/types/product";
-import { nameToSlug } from "src/utils/slug";
-import ProductCard from "@components/product/ProductCard";
-
+import { cartService } from "src/services/cartService";
 
 interface ProductDetailsProps {
     product: Product;
@@ -16,6 +14,25 @@ export default function ProductDetails({
     relatedProducts,
 }: ProductDetailsProps) {
     const [quantity, setQuantity] = useState(1);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [isInCart, setIsInCart] = useState(false);
+    const [cartQuantity, setCartQuantity] = useState(0);
+
+    // Verificar si el producto está en el carrito
+    useEffect(() => {
+        const cartItem = cartService.getCartItem(product.id);
+        setIsInCart(!!cartItem);
+        setCartQuantity(cartItem?.quantity || 0);
+
+        // Suscribirse a cambios del carrito
+        const unsubscribe = cartService.subscribe(() => {
+            const updatedCartItem = cartService.getCartItem(product.id);
+            setIsInCart(!!updatedCartItem);
+            setCartQuantity(updatedCartItem?.quantity || 0);
+        });
+
+        return unsubscribe;
+    }, [product.id]);
 
     const handleQuantityChange = (increment: boolean) => {
         if (increment && quantity < product.stock) {
@@ -25,12 +42,25 @@ export default function ProductDetails({
         }
     };
 
-    const handleAddToCart = () => {
-        console.log("Agregando al carrito:", {
-            productId: product.id,
-            quantity,
-        });
-        // Aquí irá la lógica del carrito
+    const handleAddToCart = async () => {
+        setAddingToCart(true);
+        try {
+            const success = cartService.addToCart(product, quantity);
+            if (success) {
+                // Opcional: mostrar notificación de éxito
+                console.log(`${product.name} agregado al carrito`);
+
+                // Resetear cantidad a 1 después de agregar
+                setQuantity(1);
+            } else {
+                alert("No hay suficiente stock disponible");
+            }
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+            alert("Error al agregar al carrito");
+        } finally {
+            setAddingToCart(false);
+        }
     };
 
     // Determinar estado del stock
@@ -88,6 +118,15 @@ export default function ProductDetails({
                         >
                             {stockStatus.text}
                         </span>
+
+                        {/* Mostrar si está en el carrito */}
+                        {isInCart && (
+                            <div className="mt-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✓ En el carrito ({cartQuantity})
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Descripción */}
@@ -109,7 +148,7 @@ export default function ProductDetails({
                             <div className="flex items-center border border-gray-300 rounded-md">
                                 <button
                                     onClick={() => handleQuantityChange(false)}
-                                    disabled={quantity <= 1}
+                                    disabled={quantity <= 1 || addingToCart}
                                     className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     −
@@ -119,8 +158,10 @@ export default function ProductDetails({
                                 </span>
                                 <button
                                     onClick={() => handleQuantityChange(true)}
-                                    disabled={quantity >= product.stock}
-                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    disabled={quantity >= product.stock || addingToCart}
+                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    +
                                 </button>
                             </div>
                             <span className="text-sm text-gray-500">
@@ -129,11 +170,13 @@ export default function ProductDetails({
                         </div>
                     </div>
 
-                    {/* Botón de compra */}
-                    <div className="pt-4">
+                    {/* Botones de acción */}
+                    <div className="pt-4 space-y-3">
                         <Button
                             text={
-                                stockStatus.status === "out"
+                                addingToCart
+                                    ? "Agregando..."
+                                    : stockStatus.status === "out"
                                     ? "Producto agotado"
                                     : "Agregar al carrito"
                             }
@@ -143,7 +186,16 @@ export default function ProductDetails({
                                     : "primary"
                             }
                             onClick={handleAddToCart}
+                            disabled={stockStatus.status === "out" || addingToCart}
                         />
+
+                        {isInCart && (
+                            <Button
+                                text="Ver Carrito"
+                                type="outline"
+                                href="/cart"
+                            />
+                        )}
                     </div>
 
                     {/* Información adicional */}
@@ -158,6 +210,12 @@ export default function ProductDetails({
                             <span>Stock disponible:</span>
                             <span>{product.stock} unidades</span>
                         </div>
+                        {cartQuantity > 0 && (
+                            <div className="flex justify-between">
+                                <span>En tu carrito:</span>
+                                <span className="font-medium text-green-600">{cartQuantity} unidades</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,30 +1,56 @@
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "./ui/Button";
-import { faSearch, faShoppingCart, faUser, faSignOut } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faUser, faSignOut } from "@fortawesome/free-solid-svg-icons";
 import { signOut } from "auth-astro/client";
 import type { Session } from "@auth/core/types";
+import { cartService } from "src/services/cartService";
 
 interface ActionsHeaderClientProps {
     session: Session | null;
 }
 
 export function ActionsHeaderClient({ session }: ActionsHeaderClientProps) {
+    const [cartItemCount, setCartItemCount] = useState(0);
+
+    useEffect(() => {
+        // Cargar contador inicial
+        const cart = cartService.getCart();
+        setCartItemCount(cart.itemCount);
+
+        // Suscribirse a cambios del carrito
+        const unsubscribe = cartService.subscribe((updatedCart) => {
+            setCartItemCount(updatedCart.itemCount);
+        });
+
+        return unsubscribe;
+    }, []);
+
     const handleSignOut = () => {
         signOut();
     };
 
     return (
         <>
-            <Button
-                text=""
-                type="link"
-                icon={
-                    <FontAwesomeIcon
-                        icon={faShoppingCart}
-                        className="max-w-4 max-h-4"
-                    />
-                }
-            />
+            {/* Botón del carrito con contador */}
+            <div className="relative inline-flex items-center">
+                <Button
+                    text=""
+                    type="link"
+                    href="/cart"
+                    icon={
+                        <FontAwesomeIcon
+                            icon={faShoppingCart}
+                            className="max-w-4 max-h-4"
+                        />
+                    }
+                />
+                {cartItemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {cartItemCount > 99 ? '99+' : cartItemCount}
+                    </span>
+                )}
+            </div>
 
             {session?.user ? (
                 // Usuario logueado - mostrar perfil y logout
