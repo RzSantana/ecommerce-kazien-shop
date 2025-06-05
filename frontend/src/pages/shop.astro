@@ -8,6 +8,9 @@ export const prerender = false;
 
 const currencyType = "€";
 
+// Obtener parámetro de búsqueda de la URL
+const searchQuery = Astro.url.searchParams.get('q') || '';
+
 let products: any[] = [];
 let errorMessage = "";
 
@@ -21,6 +24,7 @@ try {
         price: product.price,
         cover: product.cover,
         category: product.category,
+        categoryId: product.categoryId,
         stock: product.stock,
         isNew: product.isNew,
         isTopSale: product.isTopSale,
@@ -28,6 +32,9 @@ try {
     }));
 
     console.log(`Productos cargados: ${products.length}`);
+    if (searchQuery) {
+        console.log(`Búsqueda inicial: "${searchQuery}"`);
+    }
 } catch (error) {
     console.error("Error al cargar productos:", error);
     errorMessage = "Error al cargar los productos de la tienda.";
@@ -36,7 +43,16 @@ try {
 
 <ClientLayout>
     <section class="flex flex-col items-center pt-50 px-8 min-h-screen">
-        <Title isPrimary={false}>OUR PRODUCTS</Title>
+        <div class="mb-8 text-center">
+            <Title isPrimary={false}>
+                {searchQuery ? `SEARCH RESULTS` : `OUR PRODUCTS`}
+            </Title>
+            {searchQuery && (
+                <p class="text-gray-600 text-lg mt-2">
+                    Search results for "<span class="font-semibold">{searchQuery}</span>"
+                </p>
+            )}
+        </div>
 
         {
             errorMessage ? (
@@ -53,6 +69,7 @@ try {
                 <ProductsFilter
                     products={products}
                     currencyType={currencyType}
+                    initialSearchQuery={searchQuery}
                     client:load
                 />
             )

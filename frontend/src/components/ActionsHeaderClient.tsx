@@ -20,16 +20,6 @@ export function ActionsHeaderClient({ session }: ActionsHeaderClientProps) {
                 type="link"
                 icon={
                     <FontAwesomeIcon
-                        icon={faSearch}
-                        className="max-w-4 max-h-4"
-                    />
-                }
-            />
-            <Button
-                text=""
-                type="link"
-                icon={
-                    <FontAwesomeIcon
                         icon={faShoppingCart}
                         className="max-w-4 max-h-4"
                     />
