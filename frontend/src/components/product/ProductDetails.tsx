@@ -20,19 +20,25 @@ export default function ProductDetails({
 
     // Verificar si el producto está en el carrito
     useEffect(() => {
-        const cartItem = cartService.getCartItem(product.id);
-        setIsInCart(!!cartItem);
-        setCartQuantity(cartItem?.quantity || 0);
+        checkCartStatus();
 
         // Suscribirse a cambios del carrito
         const unsubscribe = cartService.subscribe(() => {
-            const updatedCartItem = cartService.getCartItem(product.id);
-            setIsInCart(!!updatedCartItem);
-            setCartQuantity(updatedCartItem?.quantity || 0);
+            checkCartStatus();
         });
 
         return unsubscribe;
     }, [product.id]);
+
+    const checkCartStatus = async () => {
+        try {
+            const cartItem = await cartService.getCartItem(product.id);
+            setIsInCart(!!cartItem);
+            setCartQuantity(cartItem?.quantity || 0);
+        } catch (error) {
+            console.error("Error checking cart status:", error);
+        }
+    };
 
     const handleQuantityChange = (increment: boolean) => {
         if (increment && quantity < product.stock) {
@@ -45,12 +51,9 @@ export default function ProductDetails({
     const handleAddToCart = async () => {
         setAddingToCart(true);
         try {
-            const success = cartService.addToCart(product, quantity);
+            const success = await cartService.addToCart(product, quantity);
             if (success) {
-                // Opcional: mostrar notificación de éxito
                 console.log(`${product.name} agregado al carrito`);
-
-                // Resetear cantidad a 1 después de agregar
                 setQuantity(1);
             } else {
                 alert("No hay suficiente stock disponible");

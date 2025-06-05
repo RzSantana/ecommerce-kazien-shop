@@ -1,3 +1,4 @@
+// backend/src/RouterManager.ts - VERSIÓN COMPLETA CON CARRITO
 /**
  * Manages the routing of the application.
  */
@@ -9,6 +10,7 @@ import { DropController } from "./features/drop/DropController";
 import { AuthController } from "./features/auth/AuthController";
 import { AdminController } from "./features/admin/AdminController";
 import { CategoryController } from "./features/category/CategoryController";
+import { CartController } from "./features/cart/CartController";
 import { DatabaseManager } from "./database/DatabaseManager";
 import { adminMiddleware } from "./utils/middleware/adminMiddleware";
 import { AuthService } from "./features/auth/AuthService";
@@ -20,6 +22,7 @@ export class RouterManager {
     private authController = new AuthController();
     private adminController = new AdminController();
     private categoryController = new CategoryController();
+    private cartController = new CartController();
     private dbManager = DatabaseManager.getInstance();
     private authService = new AuthService();
 
@@ -132,6 +135,21 @@ export class RouterManager {
             this.authController.getAccountType(ctx)
         );
 
+        // Rutas de carrito (REQUIEREN AUTH)
+        this.app.get("/api/cart", (ctx) => this.cartController.getCart(ctx));
+        this.app.post("/api/cart/items", (ctx) =>
+            this.cartController.addToCart(ctx)
+        );
+        this.app.put("/api/cart/items/:productId", (ctx) =>
+            this.cartController.updateCartItem(ctx)
+        );
+        this.app.delete("/api/cart/items/:productId", (ctx) =>
+            this.cartController.removeFromCart(ctx)
+        );
+        this.app.delete("/api/cart", (ctx) =>
+            this.cartController.clearCart(ctx)
+        );
+
         // Rutas de productos
         this.app.get("/api/products", (ctx) =>
             this.productController.getAllProducts(ctx)
@@ -233,6 +251,7 @@ export class RouterManager {
         console.log("🔒 Admin routes protected with adminMiddleware");
         console.log("📦 Product routes configured");
         console.log("📂 Category routes configured");
+        console.log("🛒 Cart routes configured");
         console.log("🧪 Debug routes enabled:");
         console.log("   GET  /debug/users - List all users");
         console.log("   POST /debug/test-login - Test credentials");

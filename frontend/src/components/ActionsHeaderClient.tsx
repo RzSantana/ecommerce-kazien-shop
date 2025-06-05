@@ -14,9 +14,7 @@ export function ActionsHeaderClient({ session }: ActionsHeaderClientProps) {
     const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
-        // Cargar contador inicial
-        const cart = cartService.getCart();
-        setCartItemCount(cart.itemCount);
+        loadCartCount();
 
         // Suscribirse a cambios del carrito
         const unsubscribe = cartService.subscribe((updatedCart) => {
@@ -25,6 +23,15 @@ export function ActionsHeaderClient({ session }: ActionsHeaderClientProps) {
 
         return unsubscribe;
     }, []);
+
+    const loadCartCount = async () => {
+        try {
+            const cart = await cartService.getCart();
+            setCartItemCount(cart.itemCount);
+        } catch (error) {
+            console.error("Error loading cart count:", error);
+        }
+    };
 
     const handleSignOut = () => {
         signOut();

@@ -8,7 +8,8 @@ import { cartService } from "src/services/cartService";
 
 export default function CartManager() {
     const [cart, setCart] = useState<Cart>({ items: [], total: 0, itemCount: 0 });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
 
     // Cargar carrito al montar
     useEffect(() => {
@@ -17,38 +18,55 @@ export default function CartManager() {
         // Suscribirse a cambios del carrito
         const unsubscribe = cartService.subscribe((updatedCart) => {
             setCart(updatedCart);
+            setLoading(false);
         });
 
         return unsubscribe;
     }, []);
 
-    const loadCart = () => {
+    const loadCart = async () => {
         try {
-            const currentCart = cartService.getCart();
+            setLoading(true);
+            const currentCart = await cartService.getCart();
             setCart(currentCart);
         } catch (error) {
             console.error("Error loading cart:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleClearCart = async () => {
         if (confirm("¿Estás seguro de que quieres vaciar el carrito?")) {
-            setLoading(true);
+            setActionLoading(true);
             try {
-                cartService.clearCart();
-                loadCart();
+                await cartService.clearCart();
+                await loadCart();
             } catch (error) {
                 console.error("Error clearing cart:", error);
             } finally {
-                setLoading(false);
+                setActionLoading(false);
             }
         }
     };
 
     const handleCheckout = () => {
-        // TODO: Implementar proceso de checkout
         alert("Función de checkout próximamente disponible");
     };
+
+    // Mostrar loading inicial
+    if (loading) {
+        return (
+            <div className="text-center py-16">
+                <div className="bg-gray-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Cargando carrito...
+                </h3>
+            </div>
+        );
+    }
 
     if (cart.items.length === 0) {
         return (
@@ -92,7 +110,7 @@ export default function CartManager() {
                                 text="Vaciar Carrito"
                                 type="destructive"
                                 onClick={handleClearCart}
-                                disabled={loading}
+                                disabled={actionLoading}
                             />
                         </div>
                     </div>
@@ -157,7 +175,7 @@ export default function CartManager() {
                         text="Proceder al Checkout"
                         type="primary"
                         onClick={handleCheckout}
-                        disabled={loading}
+                        disabled={actionLoading}
                     />
 
                     <div className="mt-4 text-xs text-gray-500 text-center">

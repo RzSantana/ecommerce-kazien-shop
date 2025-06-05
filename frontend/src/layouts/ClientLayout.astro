@@ -2,14 +2,21 @@
 import Header from "@components/Header.astro";
 import MainLayout from "./MainLayout.astro";
 import Footer from "@components/Footer.astro";
+import { getSession } from "auth-astro/server";
+import CartAuthManager from '@components/cart/CartAuthManager'
 
 
+// Obtener sesión para el carrito
+const session = await getSession(Astro.request);
+const userWithRole = session?.user as any;
 ---
 
 <MainLayout>
-    <Header />
-    <main class="min-w-screen min-h-screen pb-30">
-        <slot />
-    </main>
-    <Footer />
+    <CartAuthManager userId={userWithRole?.id} client:load>
+        <Header />
+        <main class="min-w-screen min-h-screen pb-30">
+            <slot />
+        </main>
+        <Footer />
+    </CartAuthManager>
 </MainLayout>
