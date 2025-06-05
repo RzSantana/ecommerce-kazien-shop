@@ -11,7 +11,7 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
     const isComingSoon = drop.status === "COMING_SOON";
     const isEnded = drop.status === "ENDED";
 
-    type StatusConfigKey = 'coming-soon' | 'ended' | 'active';
+    type StatusConfigKey = "coming-soon" | "ended" | "active";
 
     // Configuración centralizada por estado
     const statusConfig = {
@@ -21,22 +21,19 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
                 day: "numeric",
                 year: "numeric",
             }).format(new Date(drop.releaseDate))}`,
-            buttonText: "NOTIFY ME",
-            buttonType: "outline" as const,
         },
         ended: {
             badge: "Collection Ended",
-            buttonText: "VIEW ARCHIVE",
-            buttonType: "secundary" as const,
         },
         active: {
             badge: "Available Now",
-            buttonText: "SHOP COLLECTION",
-            buttonType: "primary" as const,
         },
     };
 
-    const config = statusConfig[drop.status.toLowerCase().replace('_', '-') as StatusConfigKey];
+    const config =
+        statusConfig[
+            drop.status.toLowerCase().replace("_", "-") as StatusConfigKey
+        ];
 
     // Clases base reutilizables
     const badgeBaseClass =
@@ -72,17 +69,6 @@ export default function DropSection({ drop, currencyType }: DropSectionProps) {
                         <p className="text-gray-200 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed font-light">
                             {drop.description}
                         </p>
-
-                        <div className="pt-8">
-                            <Button
-                                text={config.buttonText}
-                                type={config.buttonType}
-                                href={`/drop/${drop.name
-                                    .toString()
-                                    .toLowerCase()
-                                    .replace(" ", "-")}`}
-                            />
-                        </div>
                     </div>
                 </div>
             </div>
