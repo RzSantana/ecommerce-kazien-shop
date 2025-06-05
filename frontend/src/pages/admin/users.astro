@@ -49,14 +49,4 @@ try {
         currentUserId={userWithRole?.id}
         client:load
     />
-
-    <!-- Debug Info (remove in production) -->
-    {import.meta.env.DEV && (
-        <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
-            <strong>Debug Info:</strong><br/>
-            Current User ID: {userWithRole?.id || 'No user ID'}<br/>
-            Users loaded: {users.length}<br/>
-            API URL: {API_CONFIG.BASE_URL}
-        </div>
-    )}
 </AdminLayout>

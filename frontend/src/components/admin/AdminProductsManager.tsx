@@ -154,7 +154,7 @@ export default function AdminProductsManager({
                 isLimited: formData.isLimited,
             };
 
-            let result;
+            let result: Product | null;
             if (editingProduct) {
                 result = await productService.updateProduct(
                     editingProduct.id,
@@ -163,7 +163,7 @@ export default function AdminProductsManager({
                 if (result) {
                     setProducts(
                         products.map((p) =>
-                            p.id === editingProduct.id ? result : p
+                            p.id === editingProduct.id ? result as Product : p
                         )
                     );
                     showToast("Product updated successfully", "success");

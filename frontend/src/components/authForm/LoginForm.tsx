@@ -33,13 +33,18 @@ export default function LoginForm() {
         try {
             console.log("🔐 Calling signIn with credentials...");
 
-            const result = await signIn("credentials", {
-                email,
-                password,
+            const response = await signIn("credentials", {
+                email: email,
+                password: password,
                 redirect: false,
                 callbackUrl: "/",
             });
 
+            if (!response) {
+                throw new Error("No response received from authentication server");
+            }
+
+            const result = await response.json();
             console.log("🔐 SignIn result:", result);
 
             if (result?.error) {
@@ -86,15 +91,6 @@ export default function LoginForm() {
                             <p className="text-sm">{error}</p>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Credentials hint for testing */}
-            {process.env.NODE_ENV === "development" && (
-                <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-sm">
-                    <p className="font-bold">Test Credentials:</p>
-                    <p>Admin: admin@kaizenshop.com / admin123</p>
-                    <p>User: fighter1@example.com / fighter123</p>
                 </div>
             )}
 

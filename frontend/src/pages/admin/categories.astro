@@ -87,26 +87,4 @@ try {
         currentUserId={userWithRole?.id}
         client:load
     />
-
-    <!-- Debug Info (remove in production) -->
-    {
-        import.meta.env.DEV && (
-            <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
-                <>
-                    <strong>Debug Info:</strong>
-                    <br />
-                </>
-                User ID: {userWithRole?.id || "No user ID"}
-                <br />
-                User Role: {userWithRole?.role || "No role"}
-                <br />
-                Categories loaded: {categories.length}
-                <br />
-                Backend API:{" "}
-                {import.meta.env.PUBLIC_API_URL || "http://localhost:3000"}
-                <br />
-                Error: {error || "None"}
-            </div>
-        )
-    }
 </AdminLayout>
