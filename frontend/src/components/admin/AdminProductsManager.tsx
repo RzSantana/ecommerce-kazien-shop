@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import Button from "@components/ui/Button";
 import type { Product } from "src/types/product";
 import { productService } from "src/services/productService";
+import { categoryService } from "src/services/categoryService";
 
 interface AdminProductsManagerProps {
     products: Product[];
     currentUserId?: string;
 }
 
-export default function AdminProductsManager({ products: initialProducts, currentUserId }: AdminProductsManagerProps) {
+export default function AdminProductsManager({
+    products: initialProducts,
+    currentUserId,
+}: AdminProductsManagerProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -19,20 +23,24 @@ export default function AdminProductsManager({ products: initialProducts, curren
         name: "",
         price: "",
         cover: "",
-        category: "",
+        categoryId: "",
         description: "",
         stock: "",
         currencyType: "€",
         isNew: false,
         isTopSale: false,
-        isLimited: false
+        isLimited: false,
     });
 
-    // Cargar categorías al montar el componente
+    // Cargar categorías reales desde el backend
     useEffect(() => {
         const loadCategories = async () => {
             try {
-                // Categorías específicas para artes marciales
+                const cats = await categoryService.getActiveCategories();
+                setCategories(cats);
+            } catch (error) {
+                console.error("Error loading categories:", error);
+                // Fallback a categorías básicas si falla
                 setCategories([
                     { id: "boxing-gloves", name: "Boxing Gloves" },
                     { id: "mma-gloves", name: "MMA Gloves" },
@@ -41,10 +49,8 @@ export default function AdminProductsManager({ products: initialProducts, curren
                     { id: "protective-gear", name: "Protective Gear" },
                     { id: "training-equipment", name: "Training Equipment" },
                     { id: "brazilian-jiu-jitsu", name: "Brazilian Jiu-Jitsu" },
-                    { id: "accessories", name: "Accessories" }
+                    { id: "accessories", name: "Accessories" },
                 ]);
-            } catch (error) {
-                console.error("Error loading categories:", error);
             }
         };
         loadCategories();
@@ -57,7 +63,7 @@ export default function AdminProductsManager({ products: initialProducts, curren
         try {
             const success = await productService.deleteProduct(productId);
             if (success) {
-                setProducts(products.filter(p => p.id !== productId));
+                setProducts(products.filter((p) => p.id !== productId));
                 showToast("Product deleted successfully", "success");
             } else {
                 setError("Failed to delete product");
@@ -76,25 +82,23 @@ export default function AdminProductsManager({ products: initialProducts, curren
             name: "",
             price: "",
             cover: "",
-            category: "",
+            categoryId: "",
             description: "",
             stock: "",
             currencyType: "€",
             isNew: false,
             isTopSale: false,
-            isLimited: false
+            isLimited: false,
         });
     };
 
     const handleEditProduct = (product: Product) => {
         setEditingProduct(product);
 
-        // Extraer el ID de la categoría de forma segura
+        // Obtener categoryId correctamente
         let categoryId = "";
         if (typeof product.category === "object" && product.category?.id) {
             categoryId = product.category.id;
-        } else if (typeof product.category === "string") {
-            categoryId = product.category;
         } else if (product.categoryId) {
             categoryId = product.categoryId;
         }
@@ -103,13 +107,13 @@ export default function AdminProductsManager({ products: initialProducts, curren
             name: product.name,
             price: product.price.toString(),
             cover: product.cover,
-            category: categoryId,
+            categoryId: categoryId,
             description: product.description || "",
             stock: product.stock.toString(),
             currencyType: product.currencyType,
             isNew: product.isNew,
             isTopSale: product.isTopSale,
-            isLimited: product.isLimited
+            isLimited: product.isLimited,
         });
         setShowCreateForm(true);
     };
@@ -117,39 +121,71 @@ export default function AdminProductsManager({ products: initialProducts, curren
     const handleSubmitForm = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError("");
 
         try {
+            // Validaciones
+            if (!formData.name.trim()) {
+                throw new Error("Product name is required");
+            }
+            if (!formData.categoryId) {
+                throw new Error("Category is required");
+            }
+            if (!formData.cover.trim()) {
+                throw new Error("Product image URL is required");
+            }
+            if (parseFloat(formData.price) <= 0) {
+                throw new Error("Price must be greater than 0");
+            }
+            if (parseInt(formData.stock) < 0) {
+                throw new Error("Stock cannot be negative");
+            }
+
             const productData = {
-                name: formData.name,
+                name: formData.name.trim(),
                 price: parseFloat(formData.price),
-                cover: formData.cover,
-                categoryId: formData.category, // Usar categoryId en lugar de category
-                description: formData.description,
+                cover: formData.cover.trim(),
+                categoryId: formData.categoryId,
+                description: formData.description.trim() || undefined,
                 stock: parseInt(formData.stock),
                 currencyType: formData.currencyType,
                 isNew: formData.isNew,
                 isTopSale: formData.isTopSale,
-                isLimited: formData.isLimited
+                isLimited: formData.isLimited,
             };
 
+            let result;
             if (editingProduct) {
-                const updatedProduct = await productService.updateProduct(editingProduct.id, productData);
-                if (updatedProduct) {
-                    setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+                result = await productService.updateProduct(
+                    editingProduct.id,
+                    productData
+                );
+                if (result) {
+                    setProducts(
+                        products.map((p) =>
+                            p.id === editingProduct.id ? result : p
+                        )
+                    );
                     showToast("Product updated successfully", "success");
+                } else {
+                    throw new Error("Failed to update product");
                 }
             } else {
-                const newProduct = await productService.createProduct(productData);
-                if (newProduct) {
-                    setProducts([newProduct, ...products]);
+                result = await productService.createProduct(productData);
+                if (result) {
+                    setProducts([result, ...products]);
                     showToast("Product created successfully", "success");
+                } else {
+                    throw new Error("Failed to create product");
                 }
             }
 
             setShowCreateForm(false);
-            setError("");
         } catch (e) {
-            setError(`Error ${editingProduct ? 'updating' : 'creating'} product`);
+            const errorMessage =
+                e instanceof Error ? e.message : "Unknown error occurred";
+            setError(errorMessage);
+            showToast(errorMessage, "error");
         } finally {
             setLoading(false);
         }
@@ -166,26 +202,23 @@ export default function AdminProductsManager({ products: initialProducts, curren
     };
 
     const showToast = (message: string, type: "success" | "error") => {
-        const toast = document.createElement('div');
+        const toast = document.createElement("div");
         toast.className = `fixed top-4 right-4 z-50 p-4 rounded-md text-white font-medium ${
-            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            type === "success" ? "bg-green-500" : "bg-red-500"
         }`;
         toast.textContent = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     };
 
-    // Función auxiliar para obtener el nombre de la categoría de forma segura
     const getCategoryName = (product: Product) => {
         if (typeof product.category === "object" && product.category?.name) {
             return product.category.name;
         }
-        if (typeof product.category === "string") {
-            return product.category;
-        }
         if (product.categoryId) {
-            // Buscar el nombre en las categorías cargadas
-            const found = categories.find(cat => cat.id === product.categoryId);
+            const found = categories.find(
+                (cat) => cat.id === product.categoryId
+            );
             return found?.name || product.categoryId;
         }
         return "Unknown Category";
@@ -240,9 +273,14 @@ export default function AdminProductsManager({ products: initialProducts, curren
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {products.map((product) => {
-                                const stockStatus = getStockStatus(product.stock);
+                                const stockStatus = getStockStatus(
+                                    product.stock
+                                );
                                 return (
-                                    <tr key={product.id} className="hover:bg-gray-50">
+                                    <tr
+                                        key={product.id}
+                                        className="hover:bg-gray-50"
+                                    >
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-12 w-12">
@@ -257,21 +295,28 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                                         {product.name}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        ID: {product.id.slice(0, 8)}...
+                                                        ID:{" "}
+                                                        {product.id.slice(0, 8)}
+                                                        ...
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">
-                                                {formatPrice(product.price, product.currencyType)}
+                                                {formatPrice(
+                                                    product.price,
+                                                    product.currencyType
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">
                                                 {product.stock} units
                                             </div>
-                                            <div className={`text-xs ${stockStatus.color}`}>
+                                            <div
+                                                className={`text-xs ${stockStatus.color}`}
+                                            >
                                                 {stockStatus.text}
                                             </div>
                                         </td>
@@ -301,14 +346,20 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button
-                                                onClick={() => handleEditProduct(product)}
+                                                onClick={() =>
+                                                    handleEditProduct(product)
+                                                }
                                                 className="text-blue-600 hover:text-blue-900"
                                                 disabled={loading}
                                             >
                                                 Edit
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteProduct(product.id)}
+                                                onClick={() =>
+                                                    handleDeleteProduct(
+                                                        product.id
+                                                    )
+                                                }
                                                 className="text-red-600 hover:text-red-900"
                                                 disabled={loading}
                                             >
@@ -325,7 +376,8 @@ export default function AdminProductsManager({ products: initialProducts, curren
                 {products.length === 0 && (
                     <div className="text-center py-12">
                         <div className="text-gray-500">
-                            No products found. Create your first product to get started.
+                            No products found. Create your first product to get
+                            started.
                         </div>
                     </div>
                 )}
@@ -334,59 +386,99 @@ export default function AdminProductsManager({ products: initialProducts, curren
             {/* Modal de formulario */}
             {showCreateForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                    <div className="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+                    <div className="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
                         <form onSubmit={handleSubmitForm} className="mt-3">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                {editingProduct ? "Edit Product" : "Create New Product"}
+                                {editingProduct
+                                    ? "Edit Product"
+                                    : "Create New Product"}
                             </h3>
 
-                            <div className="space-y-4">
+                            <div className="space-y-4 max-h-96 overflow-y-auto">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Name *
+                                    </label>
                                     <input
                                         type="text"
                                         value={formData.name}
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                name: e.target.value,
+                                            })
+                                        }
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                                         required
+                                        placeholder="Product name"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Price *
+                                        </label>
                                         <input
                                             type="number"
                                             step="0.01"
+                                            min="0"
                                             value={formData.price}
-                                            onChange={(e) => setFormData({...formData, price: e.target.value})}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    price: e.target.value,
+                                                })
+                                            }
                                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                                             required
+                                            placeholder="0.00"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Stock *
+                                        </label>
                                         <input
                                             type="number"
+                                            min="0"
                                             value={formData.stock}
-                                            onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    stock: e.target.value,
+                                                })
+                                            }
                                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                                             required
+                                            placeholder="0"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Category *
+                                    </label>
                                     <select
-                                        value={formData.category}
-                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                        value={formData.categoryId}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                categoryId: e.target.value,
+                                            })
+                                        }
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                                         required
                                     >
-                                        <option value="">Select category</option>
+                                        <option value="">
+                                            Select category
+                                        </option>
                                         {categories.map((category) => (
-                                            <option key={category.id} value={category.id}>
+                                            <option
+                                                key={category.id}
+                                                value={category.id}
+                                            >
                                                 {category.name}
                                             </option>
                                         ))}
@@ -394,23 +486,39 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Image URL *
+                                    </label>
                                     <input
                                         type="url"
                                         value={formData.cover}
-                                        onChange={(e) => setFormData({...formData, cover: e.target.value})}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                cover: e.target.value,
+                                            })
+                                        }
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
                                         required
+                                        placeholder="https://example.com/image.jpg"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Description
+                                    </label>
                                     <textarea
                                         value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                description: e.target.value,
+                                            })
+                                        }
                                         rows={3}
                                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Product description"
                                     />
                                 </div>
 
@@ -419,28 +527,49 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                         <input
                                             type="checkbox"
                                             checked={formData.isNew}
-                                            onChange={(e) => setFormData({...formData, isNew: e.target.checked})}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    isNew: e.target.checked,
+                                                })
+                                            }
                                             className="mr-2"
                                         />
-                                        <span className="text-sm text-gray-700">Mark as New</span>
+                                        <span className="text-sm text-gray-700">
+                                            Mark as New
+                                        </span>
                                     </label>
                                     <label className="flex items-center">
                                         <input
                                             type="checkbox"
                                             checked={formData.isTopSale}
-                                            onChange={(e) => setFormData({...formData, isTopSale: e.target.checked})}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    isTopSale: e.target.checked,
+                                                })
+                                            }
                                             className="mr-2"
                                         />
-                                        <span className="text-sm text-gray-700">Top Sale</span>
+                                        <span className="text-sm text-gray-700">
+                                            Top Sale
+                                        </span>
                                     </label>
                                     <label className="flex items-center">
                                         <input
                                             type="checkbox"
                                             checked={formData.isLimited}
-                                            onChange={(e) => setFormData({...formData, isLimited: e.target.checked})}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    isLimited: e.target.checked,
+                                                })
+                                            }
                                             className="mr-2"
                                         />
-                                        <span className="text-sm text-gray-700">Limited Edition</span>
+                                        <span className="text-sm text-gray-700">
+                                            Limited Edition
+                                        </span>
                                     </label>
                                 </div>
                             </div>
@@ -448,7 +577,10 @@ export default function AdminProductsManager({ products: initialProducts, curren
                             <div className="flex space-x-2 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setShowCreateForm(false)}
+                                    onClick={() => {
+                                        setShowCreateForm(false);
+                                        setError("");
+                                    }}
                                     className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                                     disabled={loading}
                                 >
@@ -459,7 +591,11 @@ export default function AdminProductsManager({ products: initialProducts, curren
                                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
                                     disabled={loading}
                                 >
-                                    {loading ? 'Saving...' : (editingProduct ? 'Update' : 'Create')}
+                                    {loading
+                                        ? "Saving..."
+                                        : editingProduct
+                                        ? "Update"
+                                        : "Create"}
                                 </button>
                             </div>
                         </form>
