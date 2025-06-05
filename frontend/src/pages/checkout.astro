@@ -1,21 +1,22 @@
 ---
 import ClientLayout from "@layouts/ClientLayout.astro";
 import CheckoutForm from "@components/checkout/CheckoutForm";
+import { getSession } from "auth-astro/server";
 
 export const prerender = false;
+
+// Obtener la sesión del usuario
+const session = await getSession(Astro.request);
+const userWithRole = session?.user as any;
 ---
 
 <ClientLayout>
     <div class="pt-32 px-4 max-w-6xl mx-auto min-h-screen">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                Checkout
-            </h1>
-            <p class="text-gray-600">
-                Completa tu compra de forma segura
-            </p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
+            <p class="text-gray-600">Complete your purchase securely</p>
         </div>
 
-        <CheckoutForm client:load />
+        <CheckoutForm userId={userWithRole?.id} client:load />
     </div>
 </ClientLayout>

@@ -19,6 +19,7 @@ export interface PaymentInfo {
 
 export interface Order {
     id: string;
+    userId: string | null; // Agregar userId para asociar pedidos a usuarios
     items: CartItem[];
     shippingInfo: ShippingInfo;
     paymentInfo: Partial<PaymentInfo>; // Solo guardamos info parcial por seguridad

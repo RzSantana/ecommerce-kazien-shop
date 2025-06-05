@@ -24,7 +24,7 @@ if (!session?.user) {
 
         <!-- Contenido de órdenes -->
         <div class="bg-white rounded-lg shadow-md p-8">
-            <OrdersManager client:load />
+            <OrdersManager userId={session?.user?.id} client:load />
         </div>
     </div>
 </ClientLayout>

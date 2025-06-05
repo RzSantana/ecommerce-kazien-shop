@@ -5,17 +5,29 @@ import { faShoppingBag, faEye } from "@fortawesome/free-solid-svg-icons";
 import type { Order } from "src/types/checkout";
 import { checkoutService } from "src/services/checkoutService";
 
-export default function OrdersManager() {
+interface OrdersManagerProps {
+    userId?: string;
+}
+
+export default function OrdersManager({ userId }: OrdersManagerProps) {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadOrders();
-    }, []);
+
+        // Migrar pedidos anónimos si el usuario se acaba de loguear
+        if (userId) {
+            checkoutService.migrateAnonymousOrders(userId);
+            // Recargar después de la migración
+            setTimeout(loadOrders, 100);
+        }
+    }, [userId]);
 
     const loadOrders = () => {
         try {
-            const userOrders = checkoutService.getOrders();
+            // Cargar solo los pedidos del usuario actual
+            const userOrders = checkoutService.getOrdersForUser(userId);
             setOrders(userOrders);
         } catch (error) {
             console.error("Error loading orders:", error);

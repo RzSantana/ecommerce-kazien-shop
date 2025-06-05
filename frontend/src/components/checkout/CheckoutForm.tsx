@@ -17,7 +17,11 @@ import type {
 import { cartService } from "src/services/cartService";
 import { checkoutService } from "src/services/checkoutService";
 
-export default function CheckoutForm() {
+interface CheckoutFormProps {
+    userId?: string; // Agregar userId como prop
+}
+
+export default function CheckoutForm({ userId }: CheckoutFormProps) {
     const [cart, setCart] = useState<Cart>({
         items: [],
         total: 0,
@@ -88,7 +92,11 @@ export default function CheckoutForm() {
                 paymentInfo,
             };
 
-            const order = await checkoutService.processCheckout(checkoutData);
+            // Pasar userId al processCheckout
+            const order = await checkoutService.processCheckout(
+                checkoutData,
+                userId
+            );
 
             // Redirigir a página de confirmación
             window.location.href = `/checkout/confirmation/${order.id}`;
