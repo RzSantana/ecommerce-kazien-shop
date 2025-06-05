@@ -9,14 +9,14 @@ import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), auth()],
-  output: "server",
+    integrations: [react(), auth()],
+    output: "server",
 
-  adapter: node({
-    mode: "standalone",
-  }),
+    adapter: node({
+        mode: "standalone",
+    }),
 
-  vite: {
-    plugins: [tailwindcss()],
-  },
+    vite: {
+        plugins: [tailwindcss()],
+    },
 });

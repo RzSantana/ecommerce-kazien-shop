@@ -5,7 +5,7 @@ import { getSession } from "auth-astro/server";
 
 export const prerender = false;
 
-// Obtener la sesión del usuario
+// Solo obtener la sesión para el ID del usuario - SIN verificaciones
 const session = await getSession(Astro.request);
 const userWithRole = session?.user as any;
 
@@ -19,7 +19,7 @@ try {
             `${API_CONFIG.BASE_URL}/api/admin/dashboard`,
             {
                 headers: {
-                    "X-User-ID": userWithRole.id, // Usar ID real del usuario
+                    "X-User-ID": userWithRole.id,
                 },
             }
         );
@@ -46,6 +46,7 @@ try {
 }
 ---
 
+<!-- frontend/src/pages/admin/index.astro -->
 <AdminLayout title="Dashboard">
     {
         error && (
@@ -252,7 +253,6 @@ try {
                         Add, edit, or remove products
                     </div>
                 </a>
-
                 <a
                     href="/admin/categories"
                     class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
@@ -264,7 +264,6 @@ try {
                         Organize product categories
                     </div>
                 </a>
-
                 <a
                     href="/admin/drops"
                     class="block p-4 border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors"
@@ -279,50 +278,4 @@ try {
             </div>
         </div>
     </div>
-
-    <!-- Recent Activity (placeholder) -->
-    <div class="mt-8 bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
-        </div>
-        <div class="p-6">
-            <div class="text-center py-8">
-                <div class="text-gray-500 mb-4">
-                    <svg
-                        class="w-12 h-12 mx-auto"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        ></path>
-                    </svg>
-                </div>
-                <p class="text-gray-500">Activity tracking coming soon...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Debug Info (remove in production) -->
-    {
-        import.meta.env.DEV && (
-            <div class="mt-6 bg-gray-100 border border-gray-300 rounded p-4 text-xs">
-                <>
-                    <strong>Debug Info:</strong>
-                    <br />
-                </>
-                User ID: {userWithRole?.id || "No user ID"}
-                <br />
-                User Role: {userWithRole?.role || "No role"}
-                <br />
-                Session: {session ? "Exists" : "Missing"}
-                <br />
-                API URL: {API_CONFIG.BASE_URL}
-            </div>
-        )
-    }
 </AdminLayout>

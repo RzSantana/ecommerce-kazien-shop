@@ -1,28 +1,16 @@
 ---
+// AdminLayout.astro - SIN verificaciones de autenticación
+// El middleware ya se encarga de eso
 import MainLayout from "./MainLayout.astro";
-import { getSession } from "auth-astro/server";
 import Button from "@components/ui/Button";
+import { getSession } from "auth-astro/server";
 
 export const prerender = false;
 
-// Verificar autenticación y rol de admin
+// Solo obtener la sesión para mostrar info del usuario
+// NO hay verificaciones ni redirecciones aquí
 const session = await getSession(Astro.request);
-
-if (!session?.user) {
-    return Astro.redirect("/auth/login");
-}
-
-// Type assertion para acceder al role
-const userWithRole = session.user as any;
-
-// Verificar que sea admin
-if (userWithRole.role !== "admin") {
-    return Astro.redirect("/");
-}
-
 const { title } = Astro.props;
-
-// Obtener la ruta actual para marcar el enlace activo
 const currentPath = Astro.url.pathname;
 ---
 
@@ -215,7 +203,11 @@ const currentPath = Astro.url.pathname;
 
                     <div class="flex items-center space-x-4">
                         <span class="text-sm text-gray-600">
-                            Welcome, {session.user.name || session.user.email}
+                            Welcome, {
+                                session?.user?.name ||
+                                    session?.user?.email ||
+                                    "User"
+                            }
                         </span>
                         <Button
                             text="Logout"
