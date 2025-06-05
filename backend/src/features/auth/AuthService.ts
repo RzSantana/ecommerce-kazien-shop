@@ -1,6 +1,11 @@
 import { DatabaseManager } from "../../database/DatabaseManager";
 import { User } from "../../generated/prisma";
-import { LoginData, RegisterData, UpdateProfileData, ChangePasswordData } from "./interfaces";
+import {
+    LoginData,
+    RegisterData,
+    UpdateProfileData,
+    ChangePasswordData,
+} from "./interfaces";
 
 export class AuthService {
     private db = DatabaseManager.getInstance().getClient();
@@ -17,7 +22,10 @@ export class AuthService {
 
     public async register(data: RegisterData): Promise<User> {
         try {
-            console.log("🔐 AuthService: Registration attempt for:", data.email);
+            console.log(
+                "🔐 AuthService: Registration attempt for:",
+                data.email
+            );
 
             // Verificar si el usuario ya existe
             const existingUser = await this.db.user.findUnique({
@@ -25,7 +33,10 @@ export class AuthService {
             });
 
             if (existingUser) {
-                console.error("❌ AuthService: User already exists:", data.email);
+                console.error(
+                    "❌ AuthService: User already exists:",
+                    data.email
+                );
                 throw new Error("User already exists");
             }
 
@@ -41,7 +52,10 @@ export class AuthService {
                 },
             });
 
-            console.log("✅ AuthService: User registered successfully:", newUser.id);
+            console.log(
+                "✅ AuthService: User registered successfully:",
+                newUser.id
+            );
             return newUser;
         } catch (error) {
             console.error("💥 AuthService Registration Error:", error);
@@ -65,14 +79,72 @@ export class AuthService {
             console.log("🔍 AuthService: User found, verifying password...");
 
             if (!this.verifyPassword(data.password, user.password)) {
-                console.error("❌ AuthService: Password verification failed for:", data.email);
+                console.error(
+                    "❌ AuthService: Password verification failed for:",
+                    data.email
+                );
                 return null;
             }
 
-            console.log("✅ AuthService: Login successful for:", data.email, "Role:", user.role);
+            console.log(
+                "✅ AuthService: Login successful for:",
+                data.email,
+                "Role:",
+                user.role
+            );
             return user;
         } catch (error) {
             console.error("💥 AuthService Login Error:", error);
+            return null;
+        }
+    }
+
+    // Método para verificar/crear usuarios de Google OAuth
+    public async findOrCreateGoogleUser(data: {
+        email: string;
+        name: string;
+        googleId: string;
+    }): Promise<User | null> {
+        try {
+            console.log(
+                "🔐 AuthService: Finding/creating Google user:",
+                data.email
+            );
+
+            // Verificar si el usuario ya existe por email
+            let user = await this.db.user.findUnique({
+                where: { email: data.email },
+            });
+
+            if (user) {
+                console.log("✅ AuthService: Google user found:", user.id);
+                return user;
+            }
+
+            // Si no existe, crear nuevo usuario OAuth
+            console.log(
+                "🔐 AuthService: Creating new Google user:",
+                data.email
+            );
+            user = await this.db.user.create({
+                data: {
+                    email: data.email,
+                    name: data.name,
+                    password: "", // Usuarios OAuth no tienen password local
+                    role: "user",
+                },
+            });
+
+            console.log(
+                "✅ AuthService: Google user created successfully:",
+                user.id
+            );
+            return user;
+        } catch (error) {
+            console.error(
+                "💥 AuthService FindOrCreateGoogleUser Error:",
+                error
+            );
             return null;
         }
     }
@@ -105,30 +177,37 @@ export class AuthService {
         }
     }
 
-    // ===== NUEVOS MÉTODOS PARA GESTIÓN DE PERFILES =====
-
-    public async updateProfile(userId: string, data: UpdateProfileData): Promise<User | null> {
+    public async updateProfile(
+        userId: string,
+        data: UpdateProfileData
+    ): Promise<User | null> {
         try {
             console.log("📝 AuthService: Updating profile for user:", userId);
 
             // Verificar que el usuario existe
             const existingUser = await this.db.user.findUnique({
-                where: { id: userId }
+                where: { id: userId },
             });
 
             if (!existingUser) {
-                console.error("❌ AuthService: User not found for profile update:", userId);
+                console.error(
+                    "❌ AuthService: User not found for profile update:",
+                    userId
+                );
                 throw new Error("User not found");
             }
 
             // Si se está cambiando el email, verificar que no esté en uso
             if (data.email && data.email !== existingUser.email) {
                 const emailInUse = await this.db.user.findUnique({
-                    where: { email: data.email }
+                    where: { email: data.email },
                 });
 
                 if (emailInUse) {
-                    console.error("❌ AuthService: Email already in use:", data.email);
+                    console.error(
+                        "❌ AuthService: Email already in use:",
+                        data.email
+                    );
                     throw new Error("Email already in use");
                 }
             }
@@ -139,11 +218,14 @@ export class AuthService {
                 data: {
                     ...(data.name && { name: data.name }),
                     ...(data.email && { email: data.email }),
-                    updatedAt: new Date()
-                }
+                    updatedAt: new Date(),
+                },
             });
 
-            console.log("✅ AuthService: Profile updated successfully for:", userId);
+            console.log(
+                "✅ AuthService: Profile updated successfully for:",
+                userId
+            );
             return updatedUser;
         } catch (error) {
             console.error("💥 AuthService UpdateProfile Error:", error);
@@ -151,23 +233,32 @@ export class AuthService {
         }
     }
 
-    public async changePassword(userId: string, data: ChangePasswordData): Promise<boolean> {
+    public async changePassword(
+        userId: string,
+        data: ChangePasswordData
+    ): Promise<boolean> {
         try {
             console.log("🔐 AuthService: Changing password for user:", userId);
 
             // Obtener usuario con password
             const user = await this.db.user.findUnique({
-                where: { id: userId }
+                where: { id: userId },
             });
 
             if (!user) {
-                console.error("❌ AuthService: User not found for password change:", userId);
+                console.error(
+                    "❌ AuthService: User not found for password change:",
+                    userId
+                );
                 throw new Error("User not found");
             }
 
             // Verificar contraseña actual
             if (!this.verifyPassword(data.currentPassword, user.password)) {
-                console.error("❌ AuthService: Current password verification failed for:", userId);
+                console.error(
+                    "❌ AuthService: Current password verification failed for:",
+                    userId
+                );
                 throw new Error("Current password is incorrect");
             }
 
@@ -179,11 +270,14 @@ export class AuthService {
                 where: { id: userId },
                 data: {
                     password: newHashedPassword,
-                    updatedAt: new Date()
-                }
+                    updatedAt: new Date(),
+                },
             });
 
-            console.log("✅ AuthService: Password changed successfully for:", userId);
+            console.log(
+                "✅ AuthService: Password changed successfully for:",
+                userId
+            );
             return true;
         } catch (error) {
             console.error("💥 AuthService ChangePassword Error:", error);
@@ -191,32 +285,44 @@ export class AuthService {
         }
     }
 
-    public async deleteAccount(userId: string, password: string): Promise<boolean> {
+    public async deleteAccount(
+        userId: string,
+        password: string
+    ): Promise<boolean> {
         try {
             console.log("🗑️ AuthService: Deleting account for user:", userId);
 
             // Obtener usuario con password
             const user = await this.db.user.findUnique({
-                where: { id: userId }
+                where: { id: userId },
             });
 
             if (!user) {
-                console.error("❌ AuthService: User not found for account deletion:", userId);
+                console.error(
+                    "❌ AuthService: User not found for account deletion:",
+                    userId
+                );
                 throw new Error("User not found");
             }
 
             // Verificar contraseña para seguridad
             if (!this.verifyPassword(password, user.password)) {
-                console.error("❌ AuthService: Password verification failed for account deletion:", userId);
+                console.error(
+                    "❌ AuthService: Password verification failed for account deletion:",
+                    userId
+                );
                 throw new Error("Password is incorrect");
             }
 
             // Eliminar cuenta
             await this.db.user.delete({
-                where: { id: userId }
+                where: { id: userId },
             });
 
-            console.log("✅ AuthService: Account deleted successfully for:", userId);
+            console.log(
+                "✅ AuthService: Account deleted successfully for:",
+                userId
+            );
             return true;
         } catch (error) {
             console.error("💥 AuthService DeleteAccount Error:", error);
@@ -229,7 +335,7 @@ export class AuthService {
         try {
             const user = await this.db.user.findUnique({
                 where: { id: userId },
-                select: { password: true }
+                select: { password: true },
             });
 
             // Si tiene password, es cuenta local
@@ -241,7 +347,10 @@ export class AuthService {
     }
 
     // Métodos existentes que mantienen compatibilidad...
-    public async testCredentials(email: string, password: string): Promise<boolean> {
+    public async testCredentials(
+        email: string,
+        password: string
+    ): Promise<boolean> {
         try {
             console.log("🧪 AuthService: Testing credentials for:", email);
             const user = await this.login({ email, password });
@@ -261,12 +370,14 @@ export class AuthService {
                     name: true,
                     role: true,
                     password: true, // Para debugging
-                }
+                },
             });
 
             console.log("🔍 AuthService: All users in database:");
-            users.forEach(user => {
-                console.log(`  - ${user.email} (${user.role}) - Hash: ${user.password}`);
+            users.forEach((user) => {
+                console.log(
+                    `  - ${user.email} (${user.role}) - Hash: ${user.password}`
+                );
             });
 
             return users;

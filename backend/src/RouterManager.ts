@@ -119,6 +119,9 @@ export class RouterManager {
         this.app.post("/api/auth/login", (ctx) =>
             this.authController.login(ctx)
         );
+        this.app.post("/api/auth/check-google-user", (ctx) =>
+            this.authController.checkGoogleUser(ctx)
+        );
         this.app.get("/api/auth/me", (ctx) => this.authController.me(ctx));
 
         // Rutas de gestión de perfil (REQUIEREN AUTH)

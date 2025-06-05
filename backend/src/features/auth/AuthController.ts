@@ -122,6 +122,73 @@ export class AuthController {
         }
     }
 
+    // POST /api/auth/check-google-user
+    public async checkGoogleUser(c: Context) {
+        try {
+            console.log("🔐 AuthController: Check Google user");
+            const { email, name, googleId } = await c.req.json();
+
+            if (!email) {
+                console.log("❌ AuthController: Missing email for Google user");
+                return c.json(
+                    {
+                        success: false,
+                        error: "Email is required",
+                    },
+                    400
+                );
+            }
+
+            console.log("🔐 AuthController: Checking Google user:", email);
+            const user = await this.authService.findOrCreateGoogleUser({
+                email,
+                name: name || email.split("@")[0],
+                googleId,
+            });
+
+            if (!user) {
+                console.log(
+                    "❌ AuthController: Failed to create/find Google user"
+                );
+                return c.json(
+                    {
+                        success: false,
+                        error: "Failed to create user",
+                    },
+                    500
+                );
+            }
+
+            // No devolver la password
+            const { password: _, ...userWithoutPassword } = user;
+
+            console.log(
+                "✅ AuthController: Google user verified/created:",
+                user.id
+            );
+            return c.json({
+                success: true,
+                data: userWithoutPassword,
+            });
+        } catch (error) {
+            console.error(
+                "❌ AuthController: Error checking Google user:",
+                error
+            );
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to verify user";
+            return c.json(
+                {
+                    success: false,
+                    error: errorMessage,
+                },
+                500
+            );
+        }
+    }
+
     // GET /api/auth/me
     public async me(c: Context) {
         try {
@@ -165,8 +232,6 @@ export class AuthController {
             );
         }
     }
-
-    // ===== NUEVOS ENDPOINTS PARA GESTIÓN DE PERFILES =====
 
     // PUT /api/auth/profile
     public async updateProfile(c: Context) {
