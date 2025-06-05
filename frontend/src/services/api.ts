@@ -1,6 +1,11 @@
 import { API_CONFIG } from "src/config/api";
 import type { ApiResponse } from "src/types/api";
 
+interface RequestOptions extends RequestInit {
+    requiresAuth?: boolean;
+    userId?: string;
+}
+
 class ApiService {
     private baseUrl: string;
 
@@ -10,17 +15,26 @@ class ApiService {
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestOptions = {}
     ): Promise<ApiResponse<T>> {
         try {
             const url = `${this.baseUrl}${endpoint}`;
+            const { requiresAuth, userId, ...fetchOptions } = options;
+
+            // Headers base
+            const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+                ...((fetchOptions.headers as Record<string, string>) || {}),
+            };
+
+            // Agregar autenticación si es requerida
+            if (requiresAuth && userId) {
+                headers["X-User-ID"] = userId;
+            }
 
             const response = await fetch(url, {
-                headers: {
-                    "Content-Type": "application/json",
-                    ...options.headers,
-                },
-                ...options,
+                ...fetchOptions,
+                headers,
             });
 
             if (!response.ok) {
@@ -36,34 +50,37 @@ class ApiService {
                 error:
                     error instanceof Error
                         ? error.message
-                        : "Unknown error occurrend",
+                        : "Unknown error occurred",
             };
         }
     }
+
     // GET request
-    async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-        return this.request<T>(endpoint, { method: "GET" });
+    async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+        return this.request<T>(endpoint, { method: "GET", ...options });
     }
 
     // POST request
-    async post<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+    async post<T>(endpoint: string, data: any, options?: RequestOptions): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: "POST",
             body: JSON.stringify(data),
+            ...options,
         });
     }
 
     // PUT request
-    async put<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+    async put<T>(endpoint: string, data: any, options?: RequestOptions): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: "PUT",
             body: JSON.stringify(data),
+            ...options,
         });
     }
 
     // DELETE request
-    async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-        return this.request<T>(endpoint, { method: "DELETE" });
+    async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+        return this.request<T>(endpoint, { method: "DELETE", ...options });
     }
 
     // Health check
