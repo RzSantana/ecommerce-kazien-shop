@@ -1,22 +1,22 @@
-# 🥋 Kaizen Shop - Martial Arts E-commerce
+# Kaizen Shop - Martial Arts E-commerce
 
 > **Kaizen Philosophy**: Everything you need to evolve into your martial art
 
 Un e-commerce moderno especializado en artes marciales con sistema de drops, carrito inteligente y panel de administración completo.
 
-## ✨ Características Principales
+## Características Principales
 
-- 🛍️ **E-commerce Completo**: Catálogo de productos, carrito, checkout y órdenes
-- 🎯 **Sistema de Drops**: Colecciones temáticas limitadas con productos exclusivos
-- 🔐 **Autenticación Dual**: Google OAuth + credenciales locales
-- 👤 **Gestión de Usuarios**: Perfiles, roles (user/admin) y configuración de cuenta
-- 🛒 **Carrito Inteligente**: Persistencia local + sincronización con usuario autenticado
-- ⚡ **Panel Admin**: Gestión completa de productos, categorías, usuarios y colecciones
-- 🎨 **UI Moderna**: Diseño responsive con Tailwind CSS y componentes reutilizables
-- 🔍 **Búsqueda Avanzada**: Filtros por categoría, precio, y búsqueda de texto
-- 📱 **Responsive**: Optimizado para mobile, tablet y desktop
+-  **E-commerce Completo**: Catálogo de productos, carrito, checkout y órdenes
+-  **Sistema de Drops**: Colecciones temáticas limitadas con productos exclusivos
+-  **Autenticación Dual**: Google OAuth + credenciales locales
+-  **Gestión de Usuarios**: Perfiles, roles (user/admin) y configuración de cuenta
+-  **Carrito Inteligente**: Persistencia local + sincronización con usuario autenticado
+-  **Panel Admin**: Gestión completa de productos, categorías, usuarios y colecciones
+-  **UI Moderna**: Diseño responsive con Tailwind CSS y componentes reutilizables
+-  **Búsqueda Avanzada**: Filtros por categoría, precio, y búsqueda de texto
+-  **Responsive**: Optimizado para mobile, tablet y desktop
 
-## 🚀 Tecnologías
+## Tecnologías
 
 ### Frontend
 - **Framework**: [Astro](https://astro.build/) v5.8.0
@@ -32,7 +32,7 @@ Un e-commerce moderno especializado en artes marciales con sistema de drops, car
 - **Database**: MySQL + [Prisma ORM](https://prisma.io/) v6.8.2
 - **Logging**: Sistema personalizado con colores (Chalk)
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 kaizen-shop/
@@ -69,11 +69,11 @@ kaizen-shop/
 └── README.md
 ```
 
-## 🔧 Instalación y Configuración
+## Instalación y Configuración
 
 ### Prerequisitos
 - **Node.js** v18+ o **Bun** v1.0+
-- **MySQL** 8.0+
+- **MariaDB** 8.0+
 - **Git**
 
 ### 1. Clonar el repositorio
@@ -159,11 +159,11 @@ bun run dev
 ```
 
 **Accesos:**
-- 🌐 **Frontend**: http://localhost:4321
-- 🔌 **API**: http://localhost:3000
-- 📊 **Prisma Studio**: `bun run db:studio`
+-  **Frontend**: http://localhost:4321
+-  **API**: http://localhost:3000
+-  **Prisma Studio**: `bun run db:studio`
 
-## 👥 Usuarios por Defecto
+##  Usuarios por Defecto
 
 Después del seed, tendrás estos usuarios:
 
@@ -177,7 +177,7 @@ Después del seed, tendrás estos usuarios:
 - **Email**: `sensei@example.com` / **Password**: `sensei123`
 - **Email**: `athlete@example.com` / **Password**: `athlete123`
 
-## 📊 Scripts Disponibles
+##  Scripts Disponibles
 
 ### Backend
 ```bash
@@ -197,7 +197,7 @@ bun run build       # Build de producción
 bun run preview     # Preview del build
 ```
 
-## 🛠️ API Endpoints
+##  API Endpoints
 
 ### Autenticación
 ```http
@@ -247,7 +247,7 @@ PUT    /api/admin/users/:id/role # Cambiar rol (Admin)
 DELETE /api/admin/users/:id    # Eliminar usuario (Admin)
 ```
 
-## 🎯 Funcionalidades Clave
+##  Funcionalidades Clave
 
 ### Sistema de Drops
 - Colecciones temáticas con productos exclusivos
@@ -271,7 +271,7 @@ DELETE /api/admin/users/:id    # Eliminar usuario (Admin)
 - **Gestión de perfiles**: Cambio de datos, contraseña y eliminación de cuenta
 - **Middleware de seguridad**: Protección de rutas admin
 
-## 🚀 Deployment
+##  Deployment
 
 ### Variables de Producción
 ```env
@@ -296,7 +296,7 @@ bun run build
 bun run build
 ```
 
-## 🤝 Contribución
+##  Contribución
 
 1. Fork el proyecto
 2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
@@ -311,20 +311,20 @@ bun run build
 - **Componentes funcionales** con hooks
 - **Servicios separados** para lógica de negocio
 
-## 📝 Licencia
+##  Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
-## 📞 Contacto
+##  Contacto
 
 **Carlos M. Rodríguez Santana**
-- 🐱 GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- 📧 Email: tu-email@ejemplo.com
+-  GitHub: [@tu-usuario](https://github.com/tu-usuario)
+-  Email: tu-email@ejemplo.com
 
 ---
 
 <div align="center">
-  <strong>🥋 Kaizen Philosophy: Continuous Improvement</strong>
+  <strong>Kaizen Philosophy: Continuous Improvement</strong>
   <br>
   <sub>Built with ❤️ for martial arts enthusiasts</sub>
 </div>
