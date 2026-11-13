@@ -4,6 +4,8 @@
 
 Un e-commerce moderno especializado en artes marciales con sistema de drops, carrito inteligente y panel de administración completo.
 
+> **Estado:** proyecto de fin de ciclo (Técnico Superior en Desarrollo de Aplicaciones Web). Funciona en local; no está desplegado.
+
 ## Características Principales
 
 -  **E-commerce Completo**: Catálogo de productos, carrito, checkout y órdenes
@@ -129,10 +131,10 @@ cd ../frontend
 bun install
 
 # Configurar variables de entorno
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-**Variables de entorno del frontend (.env.local):**
+**Variables de entorno del frontend (.env):**
 ```env
 # API Backend
 PUBLIC_API_URL=http://localhost:3000
